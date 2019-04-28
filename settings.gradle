@@ -1,0 +1,1 @@
+include ':app', ':card-slider-0.3.1'
