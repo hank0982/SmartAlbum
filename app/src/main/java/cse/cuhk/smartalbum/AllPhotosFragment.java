@@ -33,12 +33,21 @@ import cse.cuhk.smartalbum.utils.database.DBHelper;
 public class AllPhotosFragment extends Fragment {
     private DBHelper db;
     private ArrayList<Photo> photos;
-
+    private String title;
+    public AllPhotosFragment(){
+        this.title = "All Photos";
+    }
+    public AllPhotosFragment(ArrayList<Photo> photos, String title){
+        this.photos = photos;
+        this.title = title;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = new DBHelper(this.getActivity());
-        photos = db.getAllPhotos();
+        if(photos == null || photos.isEmpty()){
+            photos = db.getAllPhotos();
+        }
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,6 +56,7 @@ public class AllPhotosFragment extends Fragment {
         db = new DBHelper(this.getContext());
         View view = inflater.inflate(R.layout.all_photos_fragment, container, false);
         TextView title = view.findViewById(R.id.all_photos_title);
+        title.setText(this.title);
         title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
         title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
         PhotoViewAdaptor recyclerAdapter = new PhotoViewAdaptor(this.getActivity(), photos);

@@ -1,6 +1,7 @@
 package cse.cuhk.smartalbum.utils;
 
 public class Album {
+    public static final String ALL_PHOTOS_ALBUM_NAME = "All photos";
     public final static String AUTO_ALBUM = "cse.cuhk.smartalbum.utils.auto_album";
     public final static String MANUAL_ALBUM = "cse.cuhk.smartalbum.utils.manual_album";
 

@@ -43,8 +43,6 @@ import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 public class AlbumFragment extends Fragment {
     private DBHelper db;
-    private final int[] pics = {R.drawable.p1};
-    private final int[] pics2 = {R.drawable.p1};
     private ArrayList<Album> manulAlbums = new ArrayList<>();
     private ArrayList<Album> autoAlbums = new ArrayList<>();
 
@@ -83,7 +81,6 @@ public class AlbumFragment extends Fragment {
         db = new DBHelper(this.getActivity());
         ArrayList<Album> albums = db.getAllAlbums();
         for(Album album: albums) {
-            Log.d("albumPath", album.coverPhotoPath+" "+album.type);
 
             if(album.type.equals(Album.MANUAL_ALBUM)){
                 manulAlbums.add(album);
@@ -94,9 +91,9 @@ public class AlbumFragment extends Fragment {
         }
         if(manulAlbums.isEmpty()){
             if(db.getAllPhotos() != null && db.getAllPhotos().size() != 0){
-                db.insertAlbum("All photos",db.getAllPhotos().get(0).path, Album.MANUAL_ALBUM);
+                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME,db.getAllPhotos().get(0).path, Album.MANUAL_ALBUM);
             }else{
-                db.insertAlbum("All photos", Photo.getAllShownImagesPath(getActivityFromContext(container.getContext())).get(0),  Album.MANUAL_ALBUM);
+                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME, Photo.getAllShownImagesPath(getActivityFromContext(container.getContext())).get(0),  Album.MANUAL_ALBUM);
             }
             albums = db.getAllAlbums();
             manulAlbums.clear();
@@ -215,7 +212,11 @@ public class AlbumFragment extends Fragment {
             }
             if (clickedPosition == activeCardPosition) {
                 final Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, pics[activeCardPosition % pics.length]);
+                if(row == 1){
+                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
+                }else{
+                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
+                }
 
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                     startActivity(intent);
@@ -233,8 +234,11 @@ public class AlbumFragment extends Fragment {
                     secondRecyclerView.smoothScrollToPosition(clickedPosition);
                 }
                 final Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, pics[clickedPosition % pics.length]);
-
+                if(row == 1){
+                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
+                }else{
+                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
+                }
                 startActivity(intent);
 
             }

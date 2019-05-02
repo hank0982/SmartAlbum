@@ -38,6 +38,17 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOS_COLUMN_PATH = "path";
     public static final String PHOTOS_COLUMN_DES = "description";
 
+    // TAGS TABLE
+    public static final String TAGS_TABLE_NAME = "TAGS";
+    public static final String TAGS_COLUMN_TAGID = "tagid";
+    public static final String TAGS_COLUMN_TIMES = "tagtimes";
+    public static final String TAGS_COLUMN_NAME = "tagname";
+
+    // PHOTOTAGS TABLE
+    public static final String PHOTOTAGS_TABLE_NAME = "PHOTOTAGS";
+    public static final String PHOTOTAGS_COLUMN_PHOTOTAGSID = "phototagid";
+    public static final String PHOTOTAGS_COLUMN_PHOTOID = "photoid";
+    public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
     public DBHelper(Context context) {
         super(context, DATABASE_NAME , null, 3);
     }
@@ -56,7 +67,14 @@ public class DBHelper extends SQLiteOpenHelper {
                 "create table ALBUMPHOTOS " +
                         "(albumphotoid integer primary key, photoid integer,albumid integer)"
         );
-
+        db.execSQL(
+                "create table TAGS " +
+                        "(tagid integer primary key, tagtimes integer,tagname text)"
+        );
+        db.execSQL(
+                "create table PHOTOTAGS " +
+                        "(phototagid integer primary key, photoid integer,tagid integer)"
+        );
     }
 
     @Override
@@ -64,6 +82,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS ALBUMS");
         db.execSQL("DROP TABLE IF EXISTS PHOTOS");
         db.execSQL("DROP TABLE IF EXISTS ALBUMPHOTOS");
+        db.execSQL("DROP TABLE IF EXISTS TAGS");
+        db.execSQL("DROP TABLE IF EXISTS PHOTOTAGS");
         onCreate(db);
     }
 
@@ -85,7 +105,37 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert(ALBUMPHOTOS_TABLE_NAME, null, contentValues);
         return true;
     }
+    public ArrayList<Photo> getPhotosInAlbum(int albumid){
+        ArrayList<Photo> array_list = new ArrayList<Photo>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String albumsTableJoinAlbumPhotoTableSql = "(SELECT * FROM " + ALBUMS_TABLE_NAME + " NATURAL JOIN " + ALBUMPHOTOS_TABLE_NAME +" WHERE "+ALBUMPHOTOS_COLUMN_ALBUMID + "="+albumid+")";
+        String sql = "SELECT * FROM " + PHOTOS_TABLE_NAME + " NATURAL JOIN " + albumsTableJoinAlbumPhotoTableSql;
+        Cursor res = db.rawQuery(sql, null);
+        res.moveToFirst();
 
+        while (res.isAfterLast() == false) {
+            Photo newPhoto = convertCursorToPhoto(res);
+            array_list.add(newPhoto);
+            res.moveToNext();
+        }
+        return array_list;
+
+    }
+    private String getIdNameFromTableName(String tableName){
+        String idName;
+        if(tableName.equals(ALBUMPHOTOS_TABLE_NAME)){
+            idName = ALBUMPHOTOS_COLUMN_ALBUMPHOTOID;
+        }else if(tableName.equals(ALBUMS_TABLE_NAME)){
+            idName = ALBUMS_COLUMN_ID;
+        }else if(tableName.equals(TAGS_TABLE_NAME)){
+            idName = TAGS_COLUMN_TAGID;
+        }else if(tableName.equals(PHOTOTAGS_TABLE_NAME)){
+            idName = PHOTOTAGS_COLUMN_PHOTOTAGSID;
+        }else{
+            idName = PHOTOS_COLUMN_PHOTOID;
+        }
+        return idName;
+    }
     public boolean insertPhoto(String photoName, String path, String description) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -108,14 +158,35 @@ public class DBHelper extends SQLiteOpenHelper {
     }
     public Cursor getData(int id, String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from " + tableName + " where id=" + id + "", null);
+        String idName = getIdNameFromTableName(tableName);
+
+        Cursor res = db.rawQuery("select * from " + tableName + " where " + idName + "=" + id + "", null);
         return res;
+    }
+
+    static public Album convertCursorToAlbum(Cursor res){
+        int id = res.getInt(res.getColumnIndex(ALBUMS_COLUMN_ID));
+        String coverPhotoPath = res.getString(res.getColumnIndex(ALBUMS_COLUMN_COVERPHOTO));
+        String name = res.getString(res.getColumnIndex(ALBUMS_COLUMN_NAME));
+        String type = res.getString(res.getColumnIndex(ALBUMS_COLUMN_TYPE));
+        Album newAlbum = new Album(id, name, coverPhotoPath, type);
+        return newAlbum;
+    }
+
+    static public Photo convertCursorToPhoto(Cursor res){
+        int id = res.getInt(res.getColumnIndex(PHOTOS_COLUMN_PHOTOID));
+        String name = res.getString(res.getColumnIndex(PHOTOS_COLUMN_NAME));
+        String path = res.getString(res.getColumnIndex(PHOTOS_COLUMN_PATH));
+        String des = res.getString(res.getColumnIndex(PHOTOS_COLUMN_DES));
+        Photo newPhoto = new Photo(id, name, path, des);
+        return newPhoto;
     }
 
     public Integer deleteData(Integer id, String tableName) {
         SQLiteDatabase db = this.getWritableDatabase();
+        String idName = getIdNameFromTableName(tableName);
         return db.delete(tableName,
-                "id = ? ",
+                idName+" = ? ",
                 new String[]{Integer.toString(id)});
     }
 
@@ -132,11 +203,7 @@ public class DBHelper extends SQLiteOpenHelper {
         res.moveToFirst();
 
         while (res.isAfterLast() == false) {
-            int id = res.getInt(res.getColumnIndex(PHOTOS_COLUMN_PHOTOID));
-            String name = res.getString(res.getColumnIndex(PHOTOS_COLUMN_NAME));
-            String path = res.getString(res.getColumnIndex(PHOTOS_COLUMN_PATH));
-            String des = res.getString(res.getColumnIndex(PHOTOS_COLUMN_DES));
-            Photo newPhoto = new Photo(id, name, path, des);
+            Photo newPhoto = convertCursorToPhoto(res);
             array_list.add(newPhoto);
             res.moveToNext();
         }
@@ -149,11 +216,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery("select * from ALBUMS", null);
         res.moveToFirst();
         while (res.isAfterLast() == false) {
-            int id = res.getInt(res.getColumnIndex(ALBUMS_COLUMN_ID));
-            String coverPhotoPath = res.getString(res.getColumnIndex(ALBUMS_COLUMN_COVERPHOTO));
-            String name = res.getString(res.getColumnIndex(ALBUMS_COLUMN_NAME));
-            String type = res.getString(res.getColumnIndex(ALBUMS_COLUMN_TYPE));
-            Album newAlbum = new Album(id, name, coverPhotoPath, type);
+            Album newAlbum = convertCursorToAlbum(res);
             array_list.add(newAlbum);
             res.moveToNext();
         }

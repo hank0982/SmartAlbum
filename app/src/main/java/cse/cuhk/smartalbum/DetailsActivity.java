@@ -1,6 +1,7 @@
 package cse.cuhk.smartalbum;
 
 import android.animation.ObjectAnimator;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,111 +10,42 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
 
+import cse.cuhk.smartalbum.utils.Album;
 import cse.cuhk.smartalbum.utils.DecodeBitmapTask;
+import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class DetailsActivity extends AppCompatActivity implements DecodeBitmapTask.Listener {
+public class DetailsActivity extends AppCompatActivity {
 
     static final String BUNDLE_IMAGE_ID = "BUNDLE_IMAGE_ID";
 
-    private ImageView imageView;
-    private DecodeBitmapTask decodeBitmapTask;
 
+    private DBHelper db;
+    private Album album;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        db = new DBHelper(this.getBaseContext());
         setContentView(R.layout.activity_details);
 
-        final int smallResId = getIntent().getIntExtra(BUNDLE_IMAGE_ID, -1);
-        if (smallResId == -1) {
+        final int albumID = getIntent().getIntExtra(BUNDLE_IMAGE_ID, -999);
+        if (albumID == -999) {
             finish();
             return;
         }
+        Cursor res = db.getData(albumID, DBHelper.ALBUMS_TABLE_NAME);
+        res.moveToFirst();
+        album = DBHelper.convertCursorToAlbum(res);
+        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+        if(album.name.equals(Album.ALL_PHOTOS_ALBUM_NAME)){
+            trans.add(R.id.photo_view_fragment_container, new AllPhotosFragment());
+        }else{
 
-        imageView = (ImageView)findViewById(R.id.image);
-        imageView.setImageResource(smallResId);
-
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DetailsActivity.super.onBackPressed();
-            }
-        });
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            loadFullSizeBitmap(smallResId);
-        } else {
-            getWindow().getSharedElementEnterTransition().addListener(new Transition.TransitionListener() {
-
-                private boolean isClosing = false;
-
-                @Override public void onTransitionPause(Transition transition) {}
-                @Override public void onTransitionResume(Transition transition) {}
-                @Override public void onTransitionCancel(Transition transition) {}
-
-                @Override public void onTransitionStart(Transition transition) {
-                    if (isClosing) {
-                        addCardCorners();
-                    }
-                }
-
-                @Override public void onTransitionEnd(Transition transition) {
-                    if (!isClosing) {
-                        isClosing = true;
-
-                        removeCardCorners();
-                        loadFullSizeBitmap(smallResId);
-                    }
-                }
-            });
         }
+        trans.commit();
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (isFinishing() && decodeBitmapTask != null) {
-            decodeBitmapTask.cancel(true);
-        }
-    }
-
-    private void addCardCorners() {
-        final CardView cardView = (CardView) findViewById(R.id.card);
-        cardView.setRadius(25f);
-    }
-
-    private void removeCardCorners() {
-        final CardView cardView = (CardView)findViewById(R.id.card);
-        ObjectAnimator.ofFloat(cardView, "radius", 0f).setDuration(50).start();
-    }
-
-    private void loadFullSizeBitmap(int smallResId) {
-        int bigResId;
-        switch (smallResId) {
-            case R.drawable.p1: bigResId = R.drawable.p1_big; break;
-            case R.drawable.p2: bigResId = R.drawable.p2_big; break;
-            case R.drawable.p3: bigResId = R.drawable.p3_big; break;
-            case R.drawable.p4: bigResId = R.drawable.p4_big; break;
-            case R.drawable.p5: bigResId = R.drawable.p5_big; break;
-            default: bigResId = R.drawable.p1_big;
-        }
-
-        final DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
-
-        final int w = metrics.widthPixels;
-        final int h = metrics.heightPixels;
-
-        decodeBitmapTask = new DecodeBitmapTask(getResources(), bigResId, w, h, this);
-        decodeBitmapTask.execute();
-    }
-
-    @Override
-    public void onPostExecuted(Bitmap bitmap) {
-        imageView.setImageBitmap(bitmap);
-    }
-
 }
