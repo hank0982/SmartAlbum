@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import cse.cuhk.smartalbum.utils.Album;
 import cse.cuhk.smartalbum.utils.Photo;
+import cse.cuhk.smartalbum.utils.Tag;
 
 // SQLite Open Helper is thread safe
 public class DBHelper extends SQLiteOpenHelper {
@@ -97,6 +98,15 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
+    public boolean insertTagToPhoto(int tagID, int photoID){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("tagid", tagID);
+        contentValues.put("photoid", photoID);
+        db.insert(PHOTOTAGS_TABLE_NAME, null, contentValues);
+        return true;
+    }
+
     public boolean insertPhotoToAlbum(int photoID, int albumID) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -105,10 +115,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert(ALBUMPHOTOS_TABLE_NAME, null, contentValues);
         return true;
     }
-    public ArrayList<Photo> getPhotosInAlbum(int albumid){
+
+    public ArrayList<Photo> getPhotosInAlbum(int albumID){
         ArrayList<Photo> array_list = new ArrayList<Photo>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String albumsTableJoinAlbumPhotoTableSql = "(SELECT * FROM " + ALBUMS_TABLE_NAME + " NATURAL JOIN " + ALBUMPHOTOS_TABLE_NAME +" WHERE "+ALBUMPHOTOS_COLUMN_ALBUMID + "="+albumid+")";
+        String albumsTableJoinAlbumPhotoTableSql = "(SELECT * FROM " + ALBUMS_TABLE_NAME + " NATURAL JOIN " + ALBUMPHOTOS_TABLE_NAME +" WHERE "+ALBUMS_COLUMN_ID + "="+albumID+")";
         String sql = "SELECT * FROM " + PHOTOS_TABLE_NAME + " NATURAL JOIN " + albumsTableJoinAlbumPhotoTableSql;
         Cursor res = db.rawQuery(sql, null);
         res.moveToFirst();
@@ -119,8 +130,24 @@ public class DBHelper extends SQLiteOpenHelper {
             res.moveToNext();
         }
         return array_list;
-
     }
+
+    public ArrayList<Tag> getTagsFromPhoto(int photoID){
+        ArrayList<Tag> array_list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String photoTableJoinPhotoTagTableSql = "(SELECT * FROM " + PHOTOS_TABLE_NAME + " NATURAL JOIN " + PHOTOTAGS_TABLE_NAME +" WHERE "+PHOTOS_COLUMN_PHOTOID + "="+photoID+")";
+        String sql = "SELECT * FROM " + TAGS_TABLE_NAME + " NATURAL JOIN " + photoTableJoinPhotoTagTableSql;
+        Cursor res = db.rawQuery(sql, null);
+        res.moveToFirst();
+
+        while (res.isAfterLast() == false) {
+            Tag newTag = convertCursorToTag(res);
+            array_list.add(newTag);
+            res.moveToNext();
+        }
+        return array_list;
+    }
+
     private String getIdNameFromTableName(String tableName){
         String idName;
         if(tableName.equals(ALBUMPHOTOS_TABLE_NAME)){
@@ -163,7 +190,13 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery("select * from " + tableName + " where " + idName + "=" + id + "", null);
         return res;
     }
-
+    static public Tag convertCursorToTag(Cursor res){
+        int id = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
+        String tagName = res.getString(res.getColumnIndex(TAGS_COLUMN_NAME));
+        int times = res.getInt(res.getColumnIndex((TAGS_COLUMN_TIMES)));
+        Tag newTag = new Tag(id, tagName, times);
+        return newTag;
+    }
     static public Album convertCursorToAlbum(Cursor res){
         int id = res.getInt(res.getColumnIndex(ALBUMS_COLUMN_ID));
         String coverPhotoPath = res.getString(res.getColumnIndex(ALBUMS_COLUMN_COVERPHOTO));
