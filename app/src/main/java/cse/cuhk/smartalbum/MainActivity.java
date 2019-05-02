@@ -35,6 +35,7 @@ import com.gigamole.navigationtabstrip.NavigationTabStrip;
 import com.ramotion.cardslider.CardSliderLayoutManager;
 import com.ramotion.cardslider.CardSnapHelper;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import cse.cuhk.smartalbum.cards.SliderAdapter;
@@ -63,14 +64,25 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }else{
-            Log.d("First", getAllShownImagesPath(this).get(0));
+            sendImageListToService();
             FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
             trans.add(R.id.fragment_container, new AlbumFragment());
             trans.commit();
             initMenu();
         }
     }
+    public void sendImageListToService(){
+        Intent i=new Intent(getBaseContext(),  InitUpdateService.class);
+        startService(i);
+    }
+    public void startUpdateService(View view) {
+        startService(new Intent(getBaseContext(), InitUpdateService.class));
+    }
 
+    // Method to stop the service
+    public void stopUpdateService(View view) {
+        stopService(new Intent(getBaseContext(), InitUpdateService.class));
+    }
     private void switchFragment(int index){
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
 
@@ -130,39 +142,13 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
-                    Log.d("First", getAllShownImagesPath(this).get(0));
 
                 } else {
                     Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
                 }
         }
     }
-    private ArrayList<String> getAllShownImagesPath(Activity activity) {
 
-            Uri uri;
-            Cursor cursor;
-            int column_index_data, column_index_folder_name;
-            ArrayList<String> listOfAllImages = new ArrayList<String>();
-            String absolutePathOfImage = null;
-            uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-            String[] projection = { MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
-
-            cursor = activity.getContentResolver().query(uri, projection, null,
-                    null, null);
-
-            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            column_index_folder_name = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-            while (cursor.moveToNext()) {
-                absolutePathOfImage = cursor.getString(column_index_data);
-
-                listOfAllImages.add(absolutePathOfImage);
-            }
-            return listOfAllImages;
-
-    }
 
 
 }
