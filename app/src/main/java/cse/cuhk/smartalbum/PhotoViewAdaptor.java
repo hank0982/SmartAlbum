@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -62,8 +63,24 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
     @Override
     public void onBindViewHolder(PhotoViewHolder holder, int position) {
         File file = new File(photos.get(position).path);
+        int A = 100;
+
+        int [] redcolorpllate = {255, 255, 255, 153, 51, 51, 51,51,51,153,255,255};
+        int [] greencolorpllate = {51, 153, 255, 255, 255, 255, 255,153,51,51,51,51};
+        int [] bluecolorpllate = {51, 51, 51, 51, 51, 153, 255,255,255,255,255,153};
+        int R = redcolorpllate[position%12];
+        int G = greencolorpllate[position%12];
+        int B = bluecolorpllate[position%12];
+        int color = (A & 0xff) << 24 | (R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff);
+        R = redcolorpllate[(position+1)%12];
+        G = greencolorpllate[(position+1)%12];
+        B = bluecolorpllate[(position+1)%12];
+        int nextColor = (A & 0xff) << 24 | (R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff);
+
+        GradientDrawable gradient = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[] {color,nextColor});
+
         if(file.exists())
-            Glide.with(mContext).load(photos.get(position).path).placeholder(new ColorDrawable(Color.BLUE)).centerCrop().into(holder.mImageView);
+            Glide.with(mContext).load(photos.get(position).path).placeholder(gradient).centerCrop().into(holder.mImageView);
         else{
             Photo pendingDeletePhoto = db.getPhotoByPath(photos.get(position).path);
             db.deleteData(pendingDeletePhoto.id, DBHelper.PHOTOS_TABLE_NAME);
