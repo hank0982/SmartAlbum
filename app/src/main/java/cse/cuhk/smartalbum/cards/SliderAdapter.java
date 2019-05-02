@@ -1,22 +1,29 @@
 package cse.cuhk.smartalbum.cards;
 
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import cse.cuhk.smartalbum.R;
+import cse.cuhk.smartalbum.utils.Album;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+
+import java.util.ArrayList;
 
 public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
     private final int count;
-    private final int[] content;
+    private final ArrayList<Album> albums;
     private final View.OnClickListener listener;
 
-    public SliderAdapter(int[] content, int count, View.OnClickListener listener) {
-        this.content = content;
+    public SliderAdapter(ArrayList<Album> albums, int count, View.OnClickListener listener) {
+        this.albums = albums;
         this.count = count;
         this.listener = listener;
     }
@@ -41,13 +48,19 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
     @Override
     public void onBindViewHolder(SliderCard holder, int position) {
-        holder.setContent(content[position % content.length]);
+        if(albums.size() == 0){
+
+        }else{
+            Album album = albums.get(position%albums.size());
+            Glide.with(holder.imageView.getContext()).load(album.coverPhotoPath).placeholder(new ColorDrawable(Color.BLUE)).centerCrop().into(holder.imageView);
+            holder.title.setText(album.name);
+        }
     }
 
-    @Override
-    public void onViewRecycled(SliderCard holder) {
-        holder.clearContent();
-    }
+//    @Override
+//    public void onViewRecycled(SliderCard holder) {
+//        holder.clearContent();
+//    }
 
     @Override
     public int getItemCount() {

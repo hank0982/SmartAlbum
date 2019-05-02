@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.fivehundredpx.greedolayout.GreedoLayoutSizeCalculator;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -24,6 +25,7 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
     private ArrayList<Double> mImageAspectRatios = new ArrayList<>();
     private Context mContext;
     private ArrayList<Photo> photos;
+    private DBHelper db;
     @Override
     public double aspectRatioForIndex(int index) {
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -44,17 +46,6 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
         this.photos = photos;
         mContext = context;
     }
-//
-//    private void calculateImageAspectRatios() {
-//
-//
-//
-//        for (int i = 0; i < photos.size(); i++) {
-//
-//            Log.d("Aspect", String.valueOf(options.outWidth / (double) options.outHeight));
-//        }
-//
-//    }
 
     @Override
     public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -70,7 +61,13 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
 
     @Override
     public void onBindViewHolder(PhotoViewHolder holder, int position) {
-        Glide.with(mContext).load(photos.get(position).path).placeholder(new ColorDrawable(Color.BLUE)).centerCrop().into(holder.mImageView);
+        File file = new File(photos.get(position).path);
+        if(file.exists())
+            Glide.with(mContext).load(photos.get(position).path).placeholder(new ColorDrawable(Color.BLUE)).centerCrop().into(holder.mImageView);
+        else{
+            Photo pendingDeletePhoto = db.getPhotoByPath(photos.get(position).path);
+            db.deleteData(pendingDeletePhoto.id, DBHelper.PHOTOS_TABLE_NAME);
+        }
     }
 
     @Override

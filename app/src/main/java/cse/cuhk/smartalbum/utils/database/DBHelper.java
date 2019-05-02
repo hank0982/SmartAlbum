@@ -21,7 +21,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String ALBUMS_TABLE_NAME = "ALBUMS";
     public static final String ALBUMS_COLUMN_ID = "albumid";
     public static final String ALBUMS_COLUMN_NAME = "albumname";
-    public static final String ALBUMS_COLUMN_COVERPHOTO = "coverphoto";
+    public static final String ALBUMS_COLUMN_COVERPHOTO = "albumcoverphoto";
+    public static final String ALBUMS_COLUMN_TYPE = "albumtype";
+
 
     // ALBUMPHOTOS TABLE
     public static final String ALBUMPHOTOS_TABLE_NAME = "ALBUMPHOTOS";
@@ -37,14 +39,14 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOS_COLUMN_DES = "description";
 
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 1);
+        super(context, DATABASE_NAME , null, 3);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
                 "create table ALBUMS " +
-                        "(albumid integer primary key, albumname text,coverphoto text)"
+                        "(albumid integer primary key, albumname text,albumcoverphoto text, albumtype text)"
         );
         db.execSQL(
                 "create table PHOTOS " +
@@ -54,6 +56,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "create table ALBUMPHOTOS " +
                         "(albumphotoid integer primary key, photoid integer,albumid integer)"
         );
+
     }
 
     @Override
@@ -64,12 +67,13 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertAlbum(String name, String coverPhotoPath) {
+    public boolean insertAlbum(String name, String coverPhotoPath, String type) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("albumname", name);
-        contentValues.put("coverphoto", coverPhotoPath);
-        db.insert("ALBUMS", null, contentValues);
+        contentValues.put(ALBUMS_COLUMN_NAME, name);
+        contentValues.put(ALBUMS_COLUMN_COVERPHOTO, coverPhotoPath);
+        contentValues.put(ALBUMS_COLUMN_TYPE, type);
+        db.insert(ALBUMS_TABLE_NAME, null, contentValues);
         return true;
     }
 
@@ -78,7 +82,7 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("photoid", photoID);
         contentValues.put("albumid", albumID);
-        db.insert("ALBUMPHOTOS", null, contentValues);
+        db.insert(ALBUMPHOTOS_TABLE_NAME, null, contentValues);
         return true;
     }
 
@@ -91,7 +95,17 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert("PHOTOS", null, contentValues);
         return true;
     }
-
+    public Photo getPhotoByPath(String path){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from PHOTOS where path=" + path + "", null);
+        res.moveToFirst();
+        int id = res.getInt(res.getColumnIndex(PHOTOS_COLUMN_PHOTOID));
+        String name = res.getString(res.getColumnIndex(PHOTOS_COLUMN_NAME));
+        String imgpath = res.getString(res.getColumnIndex(PHOTOS_COLUMN_PATH));
+        String des = res.getString(res.getColumnIndex(PHOTOS_COLUMN_DES));
+        Photo newPhoto = new Photo(id, name, imgpath, des);
+        return newPhoto;
+    }
     public Cursor getData(int id, String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("select * from " + tableName + " where id=" + id + "", null);
@@ -138,8 +152,8 @@ public class DBHelper extends SQLiteOpenHelper {
             int id = res.getInt(res.getColumnIndex(ALBUMS_COLUMN_ID));
             String coverPhotoPath = res.getString(res.getColumnIndex(ALBUMS_COLUMN_COVERPHOTO));
             String name = res.getString(res.getColumnIndex(ALBUMS_COLUMN_NAME));
-
-            Album newAlbum = new Album(id, name, coverPhotoPath);
+            String type = res.getString(res.getColumnIndex(ALBUMS_COLUMN_TYPE));
+            Album newAlbum = new Album(id, name, coverPhotoPath, type);
             array_list.add(newAlbum);
             res.moveToNext();
         }

@@ -5,6 +5,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,16 +33,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ramotion.cardslider.CardSliderLayoutManager;
 import com.ramotion.cardslider.CardSnapHelper;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import cse.cuhk.smartalbum.cards.SliderAdapter;
+import cse.cuhk.smartalbum.utils.Album;
+import cse.cuhk.smartalbum.utils.Photo;
+import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 public class AlbumFragment extends Fragment {
-    private final int[] pics = {R.drawable.p1, R.drawable.p2, R.drawable.p3};
-    private final int[] pics2 = {R.drawable.people, R.drawable.p4, R.drawable.p5};
+    private DBHelper db;
+    private final int[] pics = {R.drawable.p1};
+    private final int[] pics2 = {R.drawable.p1};
+    private ArrayList<Album> manulAlbums = new ArrayList<>();
+    private ArrayList<Album> autoAlbums = new ArrayList<>();
 
-    private final SliderAdapter sliderAdapter = new SliderAdapter(pics, 20, new AlbumFragment.OnCardClickListener(1));
-    private final SliderAdapter sliderAdapter_two = new SliderAdapter(pics2, 20, new AlbumFragment.OnCardClickListener(2));
+    private SliderAdapter sliderAdapter;
+    private SliderAdapter sliderAdapter_two;
 
     private CardSliderLayoutManager layoutManger;
     private RecyclerView firstRecyclerView;
@@ -57,45 +66,59 @@ public class AlbumFragment extends Fragment {
 
     private long titleAnimationDuration;
 
+    private Activity getActivityFromContext(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity)context;
+            }
+            context = ((ContextWrapper)context).getBaseContext();
+        }
+        return null;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(AlbumFragment.this.getClass().getName(), "onCreateView");
         View view = inflater.inflate(R.layout.album_fragment, container, false);
+        db = new DBHelper(this.getActivity());
+        ArrayList<Album> albums = db.getAllAlbums();
+        for(Album album: albums) {
+            Log.d("albumPath", album.coverPhotoPath+" "+album.type);
+
+            if(album.type.equals(Album.MANUAL_ALBUM)){
+                manulAlbums.add(album);
+            }else{
+                autoAlbums.add(album);
+            }
+
+        }
+        if(manulAlbums.isEmpty()){
+            if(db.getAllPhotos() != null && db.getAllPhotos().size() != 0){
+                db.insertAlbum("All photos",db.getAllPhotos().get(0).path, Album.MANUAL_ALBUM);
+            }else{
+                db.insertAlbum("All photos", Photo.getAllShownImagesPath(getActivityFromContext(container.getContext())).get(0),  Album.MANUAL_ALBUM);
+            }
+            albums = db.getAllAlbums();
+            manulAlbums.clear();
+            autoAlbums.clear();
+            for(Album album: albums) {
+                if(album.type.equals(Album.MANUAL_ALBUM)){
+                    manulAlbums.add(album);
+                }else{
+                    autoAlbums.add(album);
+                }
+
+            }
+        }
+        sliderAdapter = new SliderAdapter(manulAlbums, manulAlbums.size(), new AlbumFragment.OnCardClickListener(1));
+        sliderAdapter_two = new SliderAdapter(autoAlbums, autoAlbums.size(), new AlbumFragment.OnCardClickListener(2));
+        Log.d(AlbumFragment.this.getClass().getName(), "onCreateView");
         initRecyclerView(view);
         initTitleText(view);
         return view;
 
     }
 
-
-
-    private ArrayList<String> getAllShownImagesPath(Activity activity) {
-
-        Uri uri;
-        Cursor cursor;
-        int column_index_data, column_index_folder_name;
-        ArrayList<String> listOfAllImages = new ArrayList<String>();
-        String absolutePathOfImage = null;
-        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        String[] projection = { MediaStore.MediaColumns.DATA,
-                MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
-
-        cursor = activity.getContentResolver().query(uri, projection, null,
-                null, null);
-
-        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-        column_index_folder_name = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-        while (cursor.moveToNext()) {
-            absolutePathOfImage = cursor.getString(column_index_data);
-
-            listOfAllImages.add(absolutePathOfImage);
-        }
-        return listOfAllImages;
-
-    }
     private void initRecyclerView(View view) {
         firstRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         firstRecyclerView.setAdapter(sliderAdapter);
