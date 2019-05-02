@@ -1,6 +1,7 @@
 package cse.cuhk.smartalbum;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -27,6 +28,10 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
     private Context mContext;
     private ArrayList<Photo> photos;
     private DBHelper db;
+    private int [] redcolorpllate = {255, 255, 255, 153, 51, 51, 51,51,51,153,255,255};
+    private int [] greencolorpllate = {51, 153, 255, 255, 255, 255, 255,153,51,51,51,51};
+    private int [] bluecolorpllate = {51, 51, 51, 51, 51, 153, 255,255,255,255,255,153};
+
     @Override
     public double aspectRatioForIndex(int index) {
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -35,7 +40,7 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
         return options.outWidth / (double) options.outHeight;
     }
 
-    public class PhotoViewHolder extends RecyclerView.ViewHolder {
+    public class PhotoViewHolder extends RecyclerView.ViewHolder{
         private ImageView mImageView;
         public PhotoViewHolder(ImageView imageView) {
             super(imageView);
@@ -66,9 +71,6 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
         File file = new File(photos.get(position).path);
         int A = 100;
 
-        int [] redcolorpllate = {255, 255, 255, 153, 51, 51, 51,51,51,153,255,255};
-        int [] greencolorpllate = {51, 153, 255, 255, 255, 255, 255,153,51,51,51,51};
-        int [] bluecolorpllate = {51, 51, 51, 51, 51, 153, 255,255,255,255,255,153};
         int R = redcolorpllate[position%12];
         int G = greencolorpllate[position%12];
         int B = bluecolorpllate[position%12];

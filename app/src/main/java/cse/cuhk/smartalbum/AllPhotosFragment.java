@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 
 import cse.cuhk.smartalbum.utils.MeasUtils;
 import cse.cuhk.smartalbum.utils.Photo;
+import cse.cuhk.smartalbum.utils.RecyclerItemClickListener;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 public class AllPhotosFragment extends Fragment {
@@ -60,11 +63,23 @@ public class AllPhotosFragment extends Fragment {
         title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
         title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
         PhotoViewAdaptor recyclerAdapter = new PhotoViewAdaptor(this.getActivity(), photos);
+
         GreedoLayoutManager layoutManager = new GreedoLayoutManager(recyclerAdapter);
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.photo_view);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        Log.d("photopath", photos.get(position).path);
+                    }
+
+                    @Override public void onLongItemClick(View view, int position) {
+                        // do whatever
+                    }
+                })
+        );
         layoutManager.setFixedHeight(true);
 
 // Set the max row height in pixels
