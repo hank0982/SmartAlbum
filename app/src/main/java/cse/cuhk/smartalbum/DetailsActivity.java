@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import cse.cuhk.smartalbum.utils.Album;
-import cse.cuhk.smartalbum.utils.DecodeBitmapTask;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 import androidx.appcompat.app.AppCompatActivity;

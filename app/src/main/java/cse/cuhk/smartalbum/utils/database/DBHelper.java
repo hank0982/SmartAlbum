@@ -51,7 +51,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOTAGS_COLUMN_PHOTOID = "photoid";
     public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 3);
+        super(context, DATABASE_NAME , null, 4);
     }
 
     @Override
@@ -174,14 +174,18 @@ public class DBHelper extends SQLiteOpenHelper {
     }
     public Photo getPhotoByPath(String path){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from PHOTOS where path=" + path + "", null);
+        Cursor res = db.rawQuery("select * from PHOTOS where path='" + path + "'", null);
         res.moveToFirst();
-        int id = res.getInt(res.getColumnIndex(PHOTOS_COLUMN_PHOTOID));
-        String name = res.getString(res.getColumnIndex(PHOTOS_COLUMN_NAME));
-        String imgpath = res.getString(res.getColumnIndex(PHOTOS_COLUMN_PATH));
-        String des = res.getString(res.getColumnIndex(PHOTOS_COLUMN_DES));
-        Photo newPhoto = new Photo(id, name, imgpath, des);
-        return newPhoto;
+        if(res.getCount()>0){
+            int id = res.getInt(res.getColumnIndex(PHOTOS_COLUMN_PHOTOID));
+            String name = res.getString(res.getColumnIndex(PHOTOS_COLUMN_NAME));
+            String imgpath = res.getString(res.getColumnIndex(PHOTOS_COLUMN_PATH));
+            String des = res.getString(res.getColumnIndex(PHOTOS_COLUMN_DES));
+            Photo newPhoto = new Photo(id, name, imgpath, des);
+            return newPhoto;
+        }else{
+            return null;
+        }
     }
     public Cursor getData(int id, String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();

@@ -34,10 +34,21 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
 
     @Override
     public double aspectRatioForIndex(int index) {
+        File file = new File(photos.get(index).path);
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(photos.get(index).path, options);
-        return options.outWidth / (double) options.outHeight;
+        if(file.exists()) {
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(photos.get(index).path, options);
+            return options.outWidth / (double) options.outHeight;
+
+        }else{
+            Photo pendingDeletePhoto = db.getPhotoByPath(photos.get(index).path);
+            if(pendingDeletePhoto!=null){
+                db.deleteData(pendingDeletePhoto.id, DBHelper.PHOTOS_TABLE_NAME);
+            }
+            return 0;
+        }
+
     }
 
     public class PhotoViewHolder extends RecyclerView.ViewHolder{
@@ -51,11 +62,11 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
     public PhotoViewAdaptor(Context context, ArrayList<Photo> photos) {
         this.photos = photos;
         mContext = context;
+        db = new DBHelper(context);
     }
 
     @Override
     public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        db = new DBHelper(parent.getContext());
         ImageView imageView = new ImageView(mContext);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
@@ -86,7 +97,9 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
             Glide.with(mContext).load(photos.get(position).path).placeholder(gradient).centerCrop().into(holder.mImageView);
         else{
             Photo pendingDeletePhoto = db.getPhotoByPath(photos.get(position).path);
-            db.deleteData(pendingDeletePhoto.id, DBHelper.PHOTOS_TABLE_NAME);
+            if(pendingDeletePhoto!=null){
+                db.deleteData(pendingDeletePhoto.id, DBHelper.PHOTOS_TABLE_NAME);
+            }
         }
     }
 

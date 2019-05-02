@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import cse.cuhk.smartalbum.R;
-import cse.cuhk.smartalbum.utils.DecodeBitmapTask;
 
 import androidx.annotation.DrawableRes;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,7 +15,6 @@ public class SliderCard extends RecyclerView.ViewHolder {
 
     public final ImageView imageView;
     public final TextView title;
-    private DecodeBitmapTask task;
 
     public SliderCard(View itemView) {
         super(itemView);
