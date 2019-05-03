@@ -11,33 +11,34 @@ import java.util.List;
 
 import cse.cuhk.smartalbum.photodetails.fragments.TravelExpandingFragment;
 import cse.cuhk.smartalbum.photodetails.model.Travel;
+import cse.cuhk.smartalbum.utils.Photo;
 
 /**
  * Created by Qs on 16/5/30.
  */
 public class TravelViewPagerAdapter extends ExpandingViewPagerAdapter {
 
-    List<Travel> travels;
+    List<Integer> photos;
 
     public TravelViewPagerAdapter(FragmentManager fm) {
         super(fm);
-        travels = new ArrayList<>();
+        photos = new ArrayList<>();
     }
 
-    public void addAll(List<Travel> travels){
-        this.travels.addAll(travels);
+    public void addAll(List<Integer> photos){
+        this.photos.addAll(photos);
         notifyDataSetChanged();
     }
 
     @Override
     public Fragment getItem(int position) {
-        Travel travel = travels.get(position);
-        return TravelExpandingFragment.newInstance(travel);
+        int photoid = photos.get(position);
+        return TravelExpandingFragment.newInstance(photoid);
     }
 
     @Override
     public int getCount() {
-        return travels.size();
+        return photos.size();
     }
 
 }

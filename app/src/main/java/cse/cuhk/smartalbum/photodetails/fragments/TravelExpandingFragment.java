@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import com.qslll.library.fragments.ExpandingFragment;
 
 import cse.cuhk.smartalbum.photodetails.model.Travel;
+import cse.cuhk.smartalbum.utils.Photo;
 
 /**
  * this is control fragment , Top and Bottom is child in it.
@@ -16,13 +17,13 @@ import cse.cuhk.smartalbum.photodetails.model.Travel;
  */
 public class TravelExpandingFragment extends ExpandingFragment {
 
-    static final String ARG_TRAVEL = "ARG_TRAVEL";
-    Travel travel;
+    static final String ARG_PHOTO = "ARG_PHOTO";
+    int photoid;
 
-    public static TravelExpandingFragment newInstance(Travel travel){
+    public static TravelExpandingFragment newInstance(Integer photoid){
         TravelExpandingFragment fragment = new TravelExpandingFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_TRAVEL, travel);
+        args.putInt(ARG_PHOTO, photoid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -32,7 +33,7 @@ public class TravelExpandingFragment extends ExpandingFragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if(args != null) {
-            travel = args.getParcelable(ARG_TRAVEL);
+            photoid = args.getInt(ARG_PHOTO);
         }
     }
 
@@ -42,7 +43,7 @@ public class TravelExpandingFragment extends ExpandingFragment {
      */
     @Override
     public Fragment getFragmentTop() {
-        return FragmentTop.newInstance(travel);
+        return FragmentTop.newInstance(photoid);
     }
 
     /**

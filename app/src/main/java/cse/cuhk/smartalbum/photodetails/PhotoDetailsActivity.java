@@ -25,23 +25,32 @@ import java.util.List;
 import cse.cuhk.smartalbum.R;
 import cse.cuhk.smartalbum.photodetails.adapter.TravelViewPagerAdapter;
 import cse.cuhk.smartalbum.photodetails.model.Travel;
+import cse.cuhk.smartalbum.utils.Photo;
+import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 public class PhotoDetailsActivity extends AppCompatActivity implements ExpandingFragment.OnExpandingClickListener{
-
+    public static final String PHOTOS_ARRAY = "cse.cuhk.smartalbum.photo_array";
+    public static final String PHOTO_ID = "cse.cuhk.smartalbum.photo_id";
     private ViewPager viewPager;
     private ViewGroup back;
+    private ArrayList<Photo> photos;
+    private DBHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("Create","created");
+        db = new DBHelper(this);
         setContentView(R.layout.photo_details_main);
         viewPager = findViewById(R.id.photo_details_viewPager);
         back = findViewById(R.id.photo_details_back);
         setupWindowAnimations();
-
+//        photos = db.getAllPhotos();
+        final ArrayList<Integer> photos = getIntent().getIntegerArrayListExtra(PHOTOS_ARRAY);
+        final int position = getIntent().getIntExtra(PHOTO_ID, -999);
         TravelViewPagerAdapter adapter = new TravelViewPagerAdapter(getSupportFragmentManager());
-        adapter.addAll(generateTravelList());
+        adapter.addAll(photos);
         viewPager.setAdapter(adapter);
-
+        viewPager.setCurrentItem(position);
 
         ExpandingPagerFactory.setupViewPager(viewPager);
 
@@ -79,23 +88,13 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
         getWindow().setExitTransition(slideTransition);
     }
 
-    private List<Travel> generateTravelList(){
-        List<Travel> travels = new ArrayList<>();
-        for(int i=0;i<5;++i){
-            travels.add(new Travel("Seychelles", R.drawable.seychelles));
-            travels.add(new Travel("Shang Hai", R.drawable.p2));
-            travels.add(new Travel("New York", R.drawable.p3));
-            travels.add(new Travel("castle", R.drawable.p1));
-        }
-        return travels;
-    }
     @SuppressWarnings("unchecked")
-    private void startInfoActivity(View view, Travel travel) {
+    private void startInfoActivity(View view, Photo photo) {
         Activity activity = this;
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(activity, new Pair<>(view, getString(R.string.transition_image)));
         ActivityCompat.startActivity(activity,
-                InfoActivity.newInstance(activity, travel),
+                InfoActivity.newInstance(activity, photo),
                 options.toBundle());
     }
 
@@ -103,7 +102,7 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
     public void onExpandingClick(View v) {
         //v is expandingfragment layout
         View view = v.findViewById(R.id.photo_details_sharedImage);
-        Travel travel = generateTravelList().get(viewPager.getCurrentItem());
-        startInfoActivity(view,travel);
+        Photo photo = photos.get(viewPager.getCurrentItem());
+        startInfoActivity(view,photo);
     }
 }
