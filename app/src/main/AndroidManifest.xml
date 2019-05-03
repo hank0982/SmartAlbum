@@ -17,7 +17,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".photodetails.PhotoDetailsActivity"></activity>
+        <activity android:name=".photodetails.PhotoDetailsActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            ></activity>
         <activity android:name=".photodetails.InfoActivity"></activity>
 
         <activity android:name=".AlbumDetailsActivity" />
