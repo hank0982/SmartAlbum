@@ -35,9 +35,9 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/photo_view"
         android:layout_width="match_parent"
-        android:layout_height="594dp"
-        android:layout_below="@id/all_photos_title_layout"
+        android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
+        android:layout_below="@id/all_photos_title_layout"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="0dp">
 
