@@ -37,9 +37,7 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
         if(file.exists()) {
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(photos.get(index).path, options);
-            if(photos.get(index).path.equals("/storage/emulated/0/DCIM/Screenshots/Screenshot_20190503-191821_Gallery.jpg")){
-                Log.d("test","newwewewew");
-            }
+
             return options.outWidth / (double) options.outHeight;
 
         }else{

@@ -41,11 +41,8 @@ public class InitUpdateService extends Service {
 
             for(String imagePath: allImages){
                 if(!imagePathSet.contains(imagePath)){
-                    Log.d("New Photo", "run: "+imagePath);
                     imagePathSet.add(imagePath);
                     db.insertPhoto(imagePath, imagePath, "Nothing");
-                }else{
-                    Log.d("In photos", imagePath+" is in db");
                 }
             }
             if (mServiceHandler != null)

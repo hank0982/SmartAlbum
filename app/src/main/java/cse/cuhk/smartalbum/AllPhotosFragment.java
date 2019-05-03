@@ -73,7 +73,6 @@ public class AllPhotosFragment extends Fragment {
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
-                        Log.d("photopath", photos.get(position).path);
                         final Intent intent = new Intent(getActivity(), PhotoDetailsActivity.class);
 
                         startActivity(intent);
