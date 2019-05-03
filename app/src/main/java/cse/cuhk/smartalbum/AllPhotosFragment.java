@@ -58,7 +58,6 @@ public class AllPhotosFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        db = new DBHelper(this.getContext());
         View view = inflater.inflate(R.layout.all_photos_fragment, container, false);
         TextView title = view.findViewById(R.id.all_photos_title);
         title.setText(this.title);

@@ -3,6 +3,7 @@ package cse.cuhk.smartalbum;
 import android.app.Service;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -37,10 +38,14 @@ public class InitUpdateService extends Service {
         public void run() {
             //DB work here
             ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
+
             for(String imagePath: allImages){
                 if(!imagePathSet.contains(imagePath)){
+                    Log.d("New Photo", "run: "+imagePath);
                     imagePathSet.add(imagePath);
                     db.insertPhoto(imagePath, imagePath, "Nothing");
+                }else{
+                    Log.d("In photos", imagePath+" is in db");
                 }
             }
             if (mServiceHandler != null)
@@ -101,7 +106,8 @@ public class InitUpdateService extends Service {
     private ArrayList<String> getAllShownImagesPath(Service service) {
 
         Uri uri;
-        Cursor cursor;
+        Cursor[] cursors = new Cursor[2];
+
         int column_index_data, column_index_folder_name;
         ArrayList<String> listOfAllImages = new ArrayList<String>();
         String absolutePathOfImage = null;
@@ -110,8 +116,19 @@ public class InitUpdateService extends Service {
         String[] projection = { MediaStore.MediaColumns.DATA,
                 MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
-        cursor = service.getContentResolver().query(uri, projection, null,
-                null, null);
+        cursors[0] = service.getContentResolver().query(uri, projection, null,
+                null,MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+        cursors[1] = service.getContentResolver().query(
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Images.Media.DATA,
+                },
+                null,
+                null,
+                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC"
+        );
+
+        Cursor cursor = new MergeCursor(cursors);
 
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         column_index_folder_name = cursor

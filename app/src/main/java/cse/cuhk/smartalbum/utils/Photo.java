@@ -3,6 +3,7 @@ package cse.cuhk.smartalbum.utils;
 import android.app.Activity;
 import android.app.Service;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -22,7 +23,8 @@ public class Photo {
     public final static ArrayList<String> getAllShownImagesPath(Activity activity) {
 
         Uri uri;
-        Cursor cursor;
+        Cursor[] cursors = new Cursor[2];
+
         int column_index_data, column_index_folder_name;
         ArrayList<String> listOfAllImages = new ArrayList<String>();
         String absolutePathOfImage = null;
@@ -31,8 +33,19 @@ public class Photo {
         String[] projection = { MediaStore.MediaColumns.DATA,
                 MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
-        cursor = activity.getContentResolver().query(uri, projection, null,
-                null, null);
+        cursors[0] = activity.getContentResolver().query(uri, projection, null,
+                null,MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+        cursors[1] = activity.getContentResolver().query(
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Images.Media.DATA,
+                },
+                null,
+                null,
+                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC"
+        );
+
+        Cursor cursor = new MergeCursor(cursors);
 
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         column_index_folder_name = cursor
