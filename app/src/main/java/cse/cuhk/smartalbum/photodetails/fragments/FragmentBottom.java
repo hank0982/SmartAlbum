@@ -53,6 +53,7 @@ public class FragmentBottom extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.photo_details_fragment_bottom, container, false);
         final NachoTextView nachoView = view.findViewById(R.id.photo_details_bottom_nacho_text_view);
+        nachoView.setSaveEnabled(false);
         nachoView.addChipTerminator(' ', ChipTerminatorHandler.BEHAVIOR_CHIPIFY_ALL);
         nachoView.addTextChangedListener(new TextWatcher() {
 
@@ -80,7 +81,7 @@ public class FragmentBottom extends Fragment {
                             db.insertTagToPhoto(tag.get(0).id, photoid);
                             db.updateTagCount(tag.get(0).id, tag.get(0).count+1);
                         }else{
-                            long rowID = db.insertTag(newChip.getText().toString());
+                            long rowID = db.insertTag(newChip.getText().toString(), true);
                             db.insertTagToPhoto((int) rowID, photoid);
                         }
                     }

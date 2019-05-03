@@ -53,7 +53,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOTAGS_COLUMN_PHOTOID = "photoid";
     public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 8);
+        super(context, DATABASE_NAME , null, 10);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class DBHelper extends SQLiteOpenHelper {
         );
         db.execSQL(
                 "create table TAGS " +
-                        "(tagid integer primary key, tagcount integer,tagname text unique)"
+                        "(tagid integer primary key, tagcount integer,tagname text unique, tagmanuallycreated integer)"
         );
         db.execSQL(
                 "create table PHOTOTAGS " +
@@ -107,7 +107,7 @@ public class DBHelper extends SQLiteOpenHelper {
             ContentValues contentValues = new ContentValues();
             contentValues.put(TAGS_COLUMN_NAME, name);
             contentValues.put(TAGS_COLUMN_COUNT, 1);
-            contentValues.put(TAGS_COLUMN_MANUALLY_CREATED, manuallyCreated);
+            contentValues.put(TAGS_COLUMN_MANUALLY_CREATED, manuallyCreated? 1:0);
             return db.insert(TAGS_TABLE_NAME, null, contentValues);
         }
         else {
@@ -116,7 +116,7 @@ public class DBHelper extends SQLiteOpenHelper {
             updateTagCount(tag.id, newCount);
             if (tag.manuallyCreated == false && manuallyCreated == true) {
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(TAGS_COLUMN_MANUALLY_CREATED, true);
+                contentValues.put(TAGS_COLUMN_MANUALLY_CREATED, true? 1:0);
                 db.update(TAGS_TABLE_NAME, contentValues, "tagid = ? ", new String[] { Integer.toString(tag.id) } );
             }
             return tag.id;
@@ -144,8 +144,12 @@ public class DBHelper extends SQLiteOpenHelper {
                 boolean manuallyCreated = res.getInt(res.getColumnIndex(TAGS_COLUMN_MANUALLY_CREATED)) > 0;
                 Tag newTag = new Tag(tagID, tagName, tagCount, manuallyCreated);
                 tags.add(newTag);
+                res.close();
+
                 return tags;
             }else{
+                res.close();
+
                 return null;
             }
         }else{
@@ -161,8 +165,10 @@ public class DBHelper extends SQLiteOpenHelper {
                         tags.add(newTag);
                         res.moveToNext();
                     }
+                    res.close();
                     return tags;
                 }else{
+                    res.close();
                     return null;
                 }
         }

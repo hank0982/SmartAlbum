@@ -56,18 +56,22 @@ public class InitUpdateService extends Service {
 
             //DB work here
             ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
-
+            int counter = 0;
             for(String imagePath: allImages){
                 long photoId;
+                counter ++;
                 if (!imagePathSet.contains(imagePath)) {
                     imagePathSet.add(imagePath);
                     photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
-                    try {
-                        Log.d("VisionAPI - file path", imagePath);
-                        new analyzeImage(photoId).execute(imagePath);
-                    } catch (Exception e) {
-                        Log.d("VisionAPI - Exception", e.toString());
+                    if(counter < 10){
+                        try {
+                            Log.d("VisionAPI - file path", imagePath);
+                            new analyzeImage(photoId).execute(imagePath);
+                        } catch (Exception e) {
+                            Log.d("VisionAPI - Exception", e.toString());
+                        }
                     }
+
                 }
             }
             if (mServiceHandler != null)
@@ -78,23 +82,6 @@ public class InitUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        // get all images from user data
-        ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
-        // save all in database
-        for(String imagePath: allImages) {
-            long photoId;
-            if (!imagePathSet.contains(imagePath)) {
-                imagePathSet.add(imagePath);
-                photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
-                try {
-                    Log.d("VisionAPI - file path", imagePath);
-                    new analyzeImage(photoId).execute(imagePath);
-                } catch (Exception e) {
-                    Log.d("VisionAPI - Exception", e.toString());
-                }
-            }
-        }
         mServiceHandler.removeCallbacks(yourRunnable);
         mServiceHandler.post(yourRunnable);
         return super.onStartCommand(intent, flags, startId);
@@ -182,7 +169,7 @@ public class InitUpdateService extends Service {
         private Exception e = null;
         private Bitmap imageToAnalyze = null;
         private long photoId;
-        private int sleepTime = 1000;
+        private int sleepTime = 3000;
 
         public analyzeImage(long photoId) {
             this.photoId = photoId;
@@ -251,7 +238,7 @@ public class InitUpdateService extends Service {
                     e1.printStackTrace();
                 }
                 String resultStr = gson.toJson(result);
-                // Log.d("VisionAPI - result", resultStr);
+                Log.d("VisionAPI - result", resultStr);
                 return resultStr;
 
                 /*
