@@ -51,7 +51,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOTAGS_COLUMN_PHOTOID = "photoid";
     public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 5);
+        super(context, DATABASE_NAME , null, 6);
     }
 
     @Override
@@ -236,7 +236,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public ArrayList<Photo> getAllPhotos() {
         ArrayList<Photo> array_list = new ArrayList<Photo>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from PHOTOS", null);
+        Cursor res = db.rawQuery("select * from PHOTOS Order by photoid DESC", null);
         res.moveToFirst();
 
         while (res.isAfterLast() == false) {

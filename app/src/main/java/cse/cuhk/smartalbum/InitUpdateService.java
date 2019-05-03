@@ -117,7 +117,7 @@ public class InitUpdateService extends Service {
                 MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
         cursors[0] = service.getContentResolver().query(uri, projection, null,
-                null,MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+                null,MediaStore.Images.ImageColumns.DATE_TAKEN + " ASC");
         cursors[1] = service.getContentResolver().query(
                 MediaStore.Images.Media.INTERNAL_CONTENT_URI,
                 new String[]{
@@ -125,7 +125,7 @@ public class InitUpdateService extends Service {
                 },
                 null,
                 null,
-                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC"
+                MediaStore.Images.ImageColumns.DATE_TAKEN + " ASC"
         );
 
         Cursor cursor = new MergeCursor(cursors);
