@@ -33,6 +33,7 @@ import com.microsoft.projectoxford.vision.rest.VisionServiceException;
 import cse.cuhk.smartalbum.utils.Photo;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
 
+import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static android.os.AsyncTask.Status.FINISHED;
 
 public class InitUpdateService extends Service {
@@ -53,20 +54,20 @@ public class InitUpdateService extends Service {
     private Runnable yourRunnable = new Runnable() {
         @Override
         public void run() {
-
+            Log.d("START", "STARTRUN");
             //DB work here
             ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
             int counter = 0;
             for(String imagePath: allImages){
                 long photoId;
-                counter ++;
                 if (!imagePathSet.contains(imagePath)) {
                     imagePathSet.add(imagePath);
                     photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
+                    counter ++;
                     if(counter < 10){
                         try {
                             Log.d("VisionAPI - file path", imagePath);
-                            new analyzeImage(photoId).execute(imagePath);
+                            new analyzeImage(photoId).executeOnExecutor(SERIAL_EXECUTOR,imagePath);
                         } catch (Exception e) {
                             Log.d("VisionAPI - Exception", e.toString());
                         }
