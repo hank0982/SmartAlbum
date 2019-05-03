@@ -103,7 +103,6 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
     @Override
     public void onExpandingClick(View v) {
         //v is expandingfragment layout
-        DBHelper db = new DBHelper(this);
         View view = v.findViewById(R.id.photo_details_sharedImage);
         Cursor res = db.getData(photos.get(viewPager.getCurrentItem()), DBHelper.PHOTOS_TABLE_NAME);
         res.moveToFirst();
