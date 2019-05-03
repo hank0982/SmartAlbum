@@ -1,1 +1,2 @@
-include ':app', ':card-slider-0.3.1'
+include ':app', ':card-slider-0.3.1', ':library'
+project(':library').projectDir = new File('libs/library')

@@ -1,6 +1,7 @@
 package cse.cuhk.smartalbum;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -28,6 +29,7 @@ import com.fivehundredpx.greedolayout.GreedoSpacingItemDecoration;
 
 import java.util.ArrayList;
 
+import cse.cuhk.smartalbum.photodetails.PhotoDetailsActivity;
 import cse.cuhk.smartalbum.utils.MeasUtils;
 import cse.cuhk.smartalbum.utils.Photo;
 import cse.cuhk.smartalbum.utils.RecyclerItemClickListener;
@@ -73,6 +75,9 @@ public class AllPhotosFragment extends Fragment {
                 new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         Log.d("photopath", photos.get(position).path);
+                        final Intent intent = new Intent(getActivity(), PhotoDetailsActivity.class);
+
+                        startActivity(intent);
                     }
 
                     @Override public void onLongItemClick(View view, int position) {

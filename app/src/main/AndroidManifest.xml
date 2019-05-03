@@ -17,7 +17,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DetailsActivity"></activity>
+        <activity android:name=".photodetails.PhotoDetailsActivity"></activity>
+        <activity android:name=".photodetails.InfoActivity"></activity>
+
+        <activity android:name=".AlbumDetailsActivity" />
 
         <meta-data
             android:name="preloaded_fonts"

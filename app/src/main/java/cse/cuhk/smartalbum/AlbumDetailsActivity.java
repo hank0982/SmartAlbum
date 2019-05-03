@@ -18,7 +18,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class DetailsActivity extends AppCompatActivity {
+public class AlbumDetailsActivity extends AppCompatActivity {
 
     static final String BUNDLE_IMAGE_ID = "BUNDLE_IMAGE_ID";
 

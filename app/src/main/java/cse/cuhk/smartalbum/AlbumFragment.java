@@ -211,11 +211,11 @@ public class AlbumFragment extends Fragment {
                 clickedPosition = secondRecyclerView.getChildAdapterPosition(view);
             }
             if (clickedPosition == activeCardPosition) {
-                final Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                final Intent intent = new Intent(getActivity(), AlbumDetailsActivity.class);
                 if(row == 1){
-                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
+                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
                 }else{
-                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
+                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
                 }
 
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -233,11 +233,11 @@ public class AlbumFragment extends Fragment {
                 }else{
                     secondRecyclerView.smoothScrollToPosition(clickedPosition);
                 }
-                final Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                final Intent intent = new Intent(getActivity(), AlbumDetailsActivity.class);
                 if(row == 1){
-                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
+                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
                 }else{
-                    intent.putExtra(DetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
+                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
                 }
                 startActivity(intent);
 
