@@ -7,6 +7,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import cse.cuhk.smartalbum.utils.Album;
@@ -42,7 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
     // TAGS TABLE
     public static final String TAGS_TABLE_NAME = "TAGS";
     public static final String TAGS_COLUMN_TAGID = "tagid";
-    public static final String TAGS_COLUMN_TIMES = "tagtimes";
+    public static final String TAGS_COLUMN_COUNT = "tagcount";
     public static final String TAGS_COLUMN_NAME = "tagname";
 
     // PHOTOTAGS TABLE
@@ -51,18 +52,18 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOTAGS_COLUMN_PHOTOID = "photoid";
     public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 6);
+        super(context, DATABASE_NAME , null, 8);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
                 "create table ALBUMS " +
-                        "(albumid integer primary key, albumname text,albumcoverphoto text, albumtype text)"
+                        "(albumid integer primary key, albumname text unique,albumcoverphoto text, albumtype text)"
         );
         db.execSQL(
                 "create table PHOTOS " +
-                        "(photoid integer primary key, photoname text,path text,description text)"
+                        "(photoid integer primary key, photoname text unique,path text,description text)"
         );
         db.execSQL(
                 "create table ALBUMPHOTOS " +
@@ -70,7 +71,7 @@ public class DBHelper extends SQLiteOpenHelper {
         );
         db.execSQL(
                 "create table TAGS " +
-                        "(tagid integer primary key, tagtimes integer,tagname text)"
+                        "(tagid integer primary key, tagcount integer,tagname text unique)"
         );
         db.execSQL(
                 "create table PHOTOTAGS " +
@@ -95,6 +96,78 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ALBUMS_COLUMN_COVERPHOTO, coverPhotoPath);
         contentValues.put(ALBUMS_COLUMN_TYPE, type);
         db.insert(ALBUMS_TABLE_NAME, null, contentValues);
+        return true;
+    }
+
+    public long insertTag(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TAGS_COLUMN_NAME, name);
+        contentValues.put(TAGS_COLUMN_COUNT, 1);
+        return db.insert(TAGS_TABLE_NAME, null, contentValues);
+
+    }
+    public boolean updateTagCount(int tagid, int newCount){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TAGS_COLUMN_COUNT, newCount);
+        db.update(TAGS_TABLE_NAME, contentValues, "tagid = ? ", new String[] { Integer.toString(tagid) } );
+        return true;
+    }
+    public ArrayList<Tag> searchTagsByName(String name, boolean match100){
+        ArrayList<Tag> tags = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        if(match100){
+            Cursor res = db.rawQuery("select * from TAGS where tagname='" + name + "'", null);
+            res.moveToFirst();
+            if(res.getCount()>0) {
+                int tagCount = res.getInt(res.getColumnIndex(TAGS_COLUMN_COUNT));
+                int tagID = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
+                String tagName = res.getString(res.getColumnIndex(TAGS_COLUMN_NAME));
+                Tag newTag = new Tag(tagID, tagName, tagCount);
+                tags.add(newTag);
+                return tags;
+            }else{
+                return null;
+            }
+        }else{
+                Cursor res = db.rawQuery("select * from TAGS where tagname like '%" + name + "%'", null);
+                res.moveToFirst();
+                if(res.getCount()>0) {
+                    while (res.isAfterLast() == false) {
+                        int tagCount = res.getInt(res.getColumnIndex(TAGS_COLUMN_COUNT));
+                        int tagID = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
+                        String tagName = res.getString(res.getColumnIndex(TAGS_COLUMN_NAME));
+                        Tag newTag = new Tag(tagID, tagName, tagCount);
+                        tags.add(newTag);
+                        res.moveToNext();
+                    }
+                    return tags;
+                }else{
+                    return null;
+                }
+        }
+    }
+    public boolean removeTagFromPhoto(int tagID, int photoID){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select phototagid, tagcount, tagid from PHOTOTAGS NATURAL JOIN TAGS where photoid=" + photoID + " and tagid=" + tagID+"", null);
+        res.moveToFirst();
+        int id = res.getInt(res.getColumnIndex(PHOTOTAGS_COLUMN_PHOTOTAGSID));
+        int tagid = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
+        int oldTagCount = res.getInt(res.getColumnIndex(TAGS_COLUMN_COUNT));
+        res.close();
+        int newTagCount = oldTagCount-1;
+        this.deleteData(id, PHOTOTAGS_TABLE_NAME);
+        db = this.getWritableDatabase();
+        if(newTagCount != 0){
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(TAGS_COLUMN_COUNT, newTagCount);
+            db.update(TAGS_TABLE_NAME, contentValues, "tagid = ? ", new String[] { Integer.toString(tagid) } );
+        }else{
+            this.deleteData(tagid, TAGS_TABLE_NAME);
+        }
         return true;
     }
 
@@ -197,7 +270,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static public Tag convertCursorToTag(Cursor res){
         int id = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
         String tagName = res.getString(res.getColumnIndex(TAGS_COLUMN_NAME));
-        int times = res.getInt(res.getColumnIndex((TAGS_COLUMN_TIMES)));
+        int times = res.getInt(res.getColumnIndex((TAGS_COLUMN_COUNT)));
         Tag newTag = new Tag(id, tagName, times);
         return newTag;
     }

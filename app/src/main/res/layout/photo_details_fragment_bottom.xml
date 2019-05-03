@@ -1,6 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_vertical"
     android:layout_height="match_parent"
     android:layout_marginLeft="20dp"
@@ -10,12 +11,14 @@
     android:orientation="vertical"
     tools:context=".photodetails.fragments.FragmentBottom">
 
-    <TextView
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:layout_width="wrap_content"
+    <com.hootsuite.nachos.NachoTextView
+        android:id="@+id/photo_details_bottom_nacho_text_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="license: every one can use this code to do everything" />
+        app:chipTextSize="16dp"
+        app:chipHeight="30dp"
+        app:chipVerticalSpacing="3dp"/>
+
 
     <RelativeLayout
         android:layout_marginTop="10dp"

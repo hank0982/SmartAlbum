@@ -123,6 +123,11 @@ public abstract class ExpandingFragment extends Fragment {
     }
 
     public void open() {
+        back.setFocusable(true);
+        back.findViewById(R.id.bottomLayout).setClickable(true);
+        back.findViewById(R.id.bottomLayout).setFocusable(true);
+        back.findViewById(R.id.bottomLayout).setVisibility(View.VISIBLE);
+        back.setClickable(true);
         ViewGroup.LayoutParams layoutParams = layout3.getLayoutParams();
         layoutParams.height = (int) (front.getHeight() * SCALE_OPENED / 4 * SCALE_OPENED);
         layout3.setLayoutParams(layoutParams);
@@ -144,6 +149,12 @@ public abstract class ExpandingFragment extends Fragment {
     }
 
     public void close() {
+        back.setFocusable(false);
+        back.findViewById(R.id.bottomLayout).setClickable(false);
+        back.findViewById(R.id.bottomLayout).setFocusable(false);
+        back.findViewById(R.id.bottomLayout).setVisibility(View.INVISIBLE);
+
+        back.setClickable(false);
         if (frontAnimator != null) {
             frontAnimator.reverse();
             backAnimator.reverse();
