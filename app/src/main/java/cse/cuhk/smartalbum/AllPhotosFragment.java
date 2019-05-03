@@ -49,15 +49,15 @@ public class AllPhotosFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = new DBHelper(this.getActivity());
-        if(photos == null || photos.isEmpty()){
-            photos = db.getAllPhotos();
-        }
+
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        db = new DBHelper(this.getActivity());
+        if(photos == null || photos.isEmpty()){
+            photos = db.getAllPhotos();
+        }
         View view = inflater.inflate(R.layout.all_photos_fragment, container, false);
         TextView title = view.findViewById(R.id.all_photos_title);
         title.setText(this.title);
@@ -73,7 +73,6 @@ public class AllPhotosFragment extends Fragment {
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
-                        Log.d("photopath", photos.get(position).path);
                         final Intent intent = new Intent(getActivity(), PhotoDetailsActivity.class);
 
                         startActivity(intent);

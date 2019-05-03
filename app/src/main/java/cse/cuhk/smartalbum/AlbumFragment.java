@@ -109,7 +109,6 @@ public class AlbumFragment extends Fragment {
         }
         sliderAdapter = new SliderAdapter(manulAlbums, manulAlbums.size(), new AlbumFragment.OnCardClickListener(1));
         sliderAdapter_two = new SliderAdapter(autoAlbums, autoAlbums.size(), new AlbumFragment.OnCardClickListener(2));
-        Log.d(AlbumFragment.this.getClass().getName(), "onCreateView");
         initRecyclerView(view);
         initTitleText(view);
         return view;

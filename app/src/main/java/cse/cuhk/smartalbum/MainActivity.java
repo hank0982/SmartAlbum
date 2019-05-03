@@ -122,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTabSelected(String title, int index) {
-                Log.d("POSITION", String.valueOf(index));
                 switchFragment(index);
             }
 

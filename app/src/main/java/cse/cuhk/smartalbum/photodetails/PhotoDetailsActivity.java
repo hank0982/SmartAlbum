@@ -94,7 +94,6 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
         Activity activity = this;
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(activity, new Pair<>(view, getString(R.string.transition_image)));
-        Log.d("STARTINFOACTIVITY", String.valueOf(options.toBundle()));
         ActivityCompat.startActivity(activity,
                 InfoActivity.newInstance(activity, travel),
                 options.toBundle());
@@ -104,7 +103,6 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
     public void onExpandingClick(View v) {
         //v is expandingfragment layout
         View view = v.findViewById(R.id.photo_details_sharedImage);
-        Log.d("TEST", "onExpandingClick: "+view);
         Travel travel = generateTravelList().get(viewPager.getCurrentItem());
         startInfoActivity(view,travel);
     }
