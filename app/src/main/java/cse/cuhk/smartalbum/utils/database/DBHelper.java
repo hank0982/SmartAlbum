@@ -53,7 +53,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOTAGS_COLUMN_PHOTOID = "photoid";
     public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 10);
+        super(context, DATABASE_NAME , null, 11);
     }
 
     @Override
