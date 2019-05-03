@@ -236,14 +236,13 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return idName;
     }
-    public boolean insertPhoto(String photoName, String path, String description) {
+    public long insertPhoto(String photoName, String path, String description) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("photoname", photoName);
         contentValues.put("path", path);
         contentValues.put("description", description);
-        db.insert("PHOTOS", null, contentValues);
-        return true;
+        return db.insert("PHOTOS", null, contentValues);
     }
     public Photo getPhotoByPath(String path){
         SQLiteDatabase db = this.getReadableDatabase();
