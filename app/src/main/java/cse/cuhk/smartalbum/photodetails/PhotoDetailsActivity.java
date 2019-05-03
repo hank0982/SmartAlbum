@@ -2,6 +2,7 @@ package cse.cuhk.smartalbum.photodetails;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -20,6 +21,7 @@ import com.qslll.library.ExpandingPagerFactory;
 import com.qslll.library.fragments.ExpandingFragment;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 import cse.cuhk.smartalbum.R;
@@ -33,7 +35,7 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
     public static final String PHOTO_ID = "cse.cuhk.smartalbum.photo_id";
     private ViewPager viewPager;
     private ViewGroup back;
-    private ArrayList<Photo> photos;
+    private ArrayList<Integer> photos;
     private DBHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +47,7 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
         back = findViewById(R.id.photo_details_back);
         setupWindowAnimations();
 //        photos = db.getAllPhotos();
-        final ArrayList<Integer> photos = getIntent().getIntegerArrayListExtra(PHOTOS_ARRAY);
+        photos = getIntent().getIntegerArrayListExtra(PHOTOS_ARRAY);
         final int position = getIntent().getIntExtra(PHOTO_ID, -999);
         TravelViewPagerAdapter adapter = new TravelViewPagerAdapter(getSupportFragmentManager());
         adapter.addAll(photos);
@@ -101,8 +103,11 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
     @Override
     public void onExpandingClick(View v) {
         //v is expandingfragment layout
+        DBHelper db = new DBHelper(this);
         View view = v.findViewById(R.id.photo_details_sharedImage);
-        Photo photo = photos.get(viewPager.getCurrentItem());
+        Cursor res = db.getData(photos.get(viewPager.getCurrentItem()), DBHelper.PHOTOS_TABLE_NAME);
+        res.moveToFirst();
+        Photo photo = DBHelper.convertCursorToPhoto(res);
         startInfoActivity(view,photo);
     }
 }
