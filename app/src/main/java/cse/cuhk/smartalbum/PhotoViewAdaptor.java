@@ -36,7 +36,7 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
         BitmapFactory.Options options = new BitmapFactory.Options();
         if(file.exists()) {
             options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(photos.get(index).path, options);
+            BitmapFactory.decodeFile(photos.get(index % photos.size()).path, options);
 
             return options.outWidth / (double) options.outHeight;
 

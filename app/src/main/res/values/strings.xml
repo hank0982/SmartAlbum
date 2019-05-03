@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">CardSlider</string>
+
+    <string name="subscription_key">575ae33a595c4b0994d9ccd2cb8f9a29</string>
+    <string name="subscription_apiroot">https://westcentralus.api.cognitive.microsoft.com/vision/v1.0</string>
+
     <string name="text1">The museum is housed in the Louvre Palace, originally built as a fortress in the late 12th century…</string>
     <string name="text2">Gwanghwamun is the main and largest gate of Gyeongbokgung Palace, in Jongno-gu, Seoul, South Korea.</string>
     <string name="text3">Tower Bridge is a combined bascule and suspension bridge in London built in 1886–1894.</string>
