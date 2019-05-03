@@ -45,6 +45,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TAGS_COLUMN_TAGID = "tagid";
     public static final String TAGS_COLUMN_COUNT = "tagcount";
     public static final String TAGS_COLUMN_NAME = "tagname";
+    public static final String TAGS_COLUMN_MANUALLY_CREATED = "tagmanuallycreated";
 
     // PHOTOTAGS TABLE
     public static final String PHOTOTAGS_TABLE_NAME = "PHOTOTAGS";
@@ -99,34 +100,49 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public long insertTag(String name) {
+    public long insertTag(String name, boolean manuallyCreated) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(TAGS_COLUMN_NAME, name);
-        contentValues.put(TAGS_COLUMN_COUNT, 1);
-        return db.insert(TAGS_TABLE_NAME, null, contentValues);
-
+        ArrayList<Tag> tags = searchTagsByName(name, true);
+        if (tags == null) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(TAGS_COLUMN_NAME, name);
+            contentValues.put(TAGS_COLUMN_COUNT, 1);
+            contentValues.put(TAGS_COLUMN_MANUALLY_CREATED, manuallyCreated);
+            return db.insert(TAGS_TABLE_NAME, null, contentValues);
+        }
+        else {
+            Tag tag = tags.get(0);
+            int newCount = tag.count + 1;
+            updateTagCount(tag.id, newCount);
+            if (tag.manuallyCreated == false && manuallyCreated == true) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(TAGS_COLUMN_MANUALLY_CREATED, true);
+                db.update(TAGS_TABLE_NAME, contentValues, "tagid = ? ", new String[] { Integer.toString(tag.id) } );
+            }
+            return tag.id;
+        }
     }
-    public boolean updateTagCount(int tagid, int newCount){
 
+    public boolean updateTagCount(int tagid, int newCount){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(TAGS_COLUMN_COUNT, newCount);
         db.update(TAGS_TABLE_NAME, contentValues, "tagid = ? ", new String[] { Integer.toString(tagid) } );
         return true;
     }
-    public ArrayList<Tag> searchTagsByName(String name, boolean match100){
+    public ArrayList<Tag> searchTagsByName(String name, boolean exactMatch){
         ArrayList<Tag> tags = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        if(match100){
+        if(exactMatch){
             Cursor res = db.rawQuery("select * from TAGS where tagname='" + name + "'", null);
             res.moveToFirst();
             if(res.getCount()>0) {
                 int tagCount = res.getInt(res.getColumnIndex(TAGS_COLUMN_COUNT));
                 int tagID = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
                 String tagName = res.getString(res.getColumnIndex(TAGS_COLUMN_NAME));
-                Tag newTag = new Tag(tagID, tagName, tagCount);
+                boolean manuallyCreated = res.getInt(res.getColumnIndex(TAGS_COLUMN_MANUALLY_CREATED)) > 0;
+                Tag newTag = new Tag(tagID, tagName, tagCount, manuallyCreated);
                 tags.add(newTag);
                 return tags;
             }else{
@@ -140,7 +156,8 @@ public class DBHelper extends SQLiteOpenHelper {
                         int tagCount = res.getInt(res.getColumnIndex(TAGS_COLUMN_COUNT));
                         int tagID = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
                         String tagName = res.getString(res.getColumnIndex(TAGS_COLUMN_NAME));
-                        Tag newTag = new Tag(tagID, tagName, tagCount);
+                        boolean manuallyCreated = res.getInt(res.getColumnIndex(TAGS_COLUMN_MANUALLY_CREATED)) > 0;
+                        Tag newTag = new Tag(tagID, tagName, tagCount, manuallyCreated);
                         tags.add(newTag);
                         res.moveToNext();
                     }
@@ -171,7 +188,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean insertTagToPhoto(int tagID, int photoID){
+    public boolean insertTagToPhoto(long tagID, long photoID){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("tagid", tagID);
@@ -270,7 +287,8 @@ public class DBHelper extends SQLiteOpenHelper {
         int id = res.getInt(res.getColumnIndex(TAGS_COLUMN_TAGID));
         String tagName = res.getString(res.getColumnIndex(TAGS_COLUMN_NAME));
         int times = res.getInt(res.getColumnIndex((TAGS_COLUMN_COUNT)));
-        Tag newTag = new Tag(id, tagName, times);
+        boolean manuallyCreated = res.getInt(res.getColumnIndex(TAGS_COLUMN_MANUALLY_CREATED)) > 0;
+        Tag newTag = new Tag(id, tagName, times, manuallyCreated);
         return newTag;
     }
     static public Album convertCursorToAlbum(Cursor res){

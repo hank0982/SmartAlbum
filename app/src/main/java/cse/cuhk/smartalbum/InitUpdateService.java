@@ -43,6 +43,7 @@ public class InitUpdateService extends Service {
     private DBHelper db;
     // update the database every 30 sec
     private int ALARM_INTERVAL = 30*1000;
+    private VisionServiceClient client = null;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -57,13 +58,17 @@ public class InitUpdateService extends Service {
             ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
 
             for(String imagePath: allImages){
+                long photoId;
                 if(!imagePathSet.contains(imagePath)){
                     imagePathSet.add(imagePath);
-                    db.insertPhoto(imagePath, imagePath, "Nothing");
+                    photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
+                }
+                else {
+                    photoId = db.getPhotoByPath(imagePath).id;
                 }
                 try {
                     Log.d("VisionAPI - file path", imagePath);
-                    new doRequest().execute(imagePath);
+                    new analyzeImage(photoId).execute(imagePath);
                 } catch (Exception e) {
                     Log.d("VisionAPI - Exception", e.toString());
                 }
@@ -80,16 +85,19 @@ public class InitUpdateService extends Service {
         // get all images from user data
         ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
         // save all in database
-        for(String imagePath: allImages){
-            if(!imagePathSet.contains(imagePath)){
+        for(String imagePath: allImages) {
+            long photoId;
+            if (!imagePathSet.contains(imagePath)) {
                 imagePathSet.add(imagePath);
-                db.insertPhoto(imagePath, imagePath, "Nothing");
-                try {
-                    Log.d("VisionAPI - file path", imagePath);
-                    new doRequest().execute(imagePath);
-                } catch (Exception e) {
-                    Log.d("VisionAPI - Exception", e.toString());
-                }
+                photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
+            } else {
+                photoId = db.getPhotoByPath(imagePath).id;
+            }
+            try {
+                Log.d("VisionAPI - file path", imagePath);
+                new analyzeImage(photoId).execute(imagePath);
+            } catch (Exception e) {
+                Log.d("VisionAPI - Exception", e.toString());
             }
         }
         mServiceHandler.removeCallbacks(yourRunnable);
@@ -99,6 +107,10 @@ public class InitUpdateService extends Service {
 
     @Override
     public void onCreate() {
+
+        if (client == null) {
+            client = new VisionServiceRestClient(getString(R.string.subscription_key), getString(R.string.subscription_apiroot));
+        }
 
         // get all imagesPath from database
         imagePathSet = new HashSet<>();
@@ -170,25 +182,20 @@ public class InitUpdateService extends Service {
     }
 
 
-    private class doRequest extends AsyncTask<String, String, String> {
+    private class analyzeImage extends AsyncTask<String, String, String> {
         // Store error message
         private Exception e = null;
-        private VisionServiceClient client = null;
         private Bitmap imageToAnalyze = null;
-        private String imagePath;
+        private long photoId;
+        private int sleepTime = 1000;
 
-        public doRequest() {
-
-            if (client == null) {
-                client = new VisionServiceRestClient(getString(R.string.subscription_key), getString(R.string.subscription_apiroot));
-            }
-
+        public analyzeImage(long photoId) {
+            this.photoId = photoId;
         }
 
         @Override
         protected String doInBackground(String... args) {
-
-            imagePath = args[0];
+            String imagePath = args[0];
 
             File file = new File(imagePath);
             BitmapFactory.Options options = new BitmapFactory.Options();
@@ -226,7 +233,7 @@ public class InitUpdateService extends Service {
             }
 
             try {
-                return process();
+                return processImage();
             } catch (Exception e) {
                 this.e = e;    // Store error
             }
@@ -234,7 +241,7 @@ public class InitUpdateService extends Service {
             return null;
         }
 
-        private String process() throws VisionServiceException, IOException {
+        private String processImage() throws VisionServiceException, IOException {
 
             Gson gson = new Gson();
             ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -242,10 +249,14 @@ public class InitUpdateService extends Service {
                 imageToAnalyze.compress(Bitmap.CompressFormat.JPEG, 90, output);
                 ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
 
-
                 AnalysisResult result = client.describe(input, 1);
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
                 String resultStr = gson.toJson(result);
-                Log.d("VisionAPI - result", resultStr);
+                // Log.d("VisionAPI - result", resultStr);
                 return resultStr;
 
                 /*
@@ -278,14 +289,19 @@ public class InitUpdateService extends Service {
 
                 //for (Caption caption: result.description.captions) {
                 //}
-
+                int count = 0;
                 for (String tag: result.description.tags) {
-
+                    long tagId = db.insertTag(tag, false);
+                    db.insertTagToPhoto(tagId, photoId);
+                    count++;
+                    if (count >= 3) {
+                        break;
+                    }
                 }
-
             }
         }
     }
+
 
 
 
