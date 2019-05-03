@@ -59,18 +59,15 @@ public class InitUpdateService extends Service {
 
             for(String imagePath: allImages){
                 long photoId;
-                if(!imagePathSet.contains(imagePath)){
+                if (!imagePathSet.contains(imagePath)) {
                     imagePathSet.add(imagePath);
                     photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
-                }
-                else {
-                    photoId = db.getPhotoByPath(imagePath).id;
-                }
-                try {
-                    Log.d("VisionAPI - file path", imagePath);
-                    new analyzeImage(photoId).execute(imagePath);
-                } catch (Exception e) {
-                    Log.d("VisionAPI - Exception", e.toString());
+                    try {
+                        Log.d("VisionAPI - file path", imagePath);
+                        new analyzeImage(photoId).execute(imagePath);
+                    } catch (Exception e) {
+                        Log.d("VisionAPI - Exception", e.toString());
+                    }
                 }
             }
             if (mServiceHandler != null)
@@ -90,14 +87,12 @@ public class InitUpdateService extends Service {
             if (!imagePathSet.contains(imagePath)) {
                 imagePathSet.add(imagePath);
                 photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
-            } else {
-                photoId = db.getPhotoByPath(imagePath).id;
-            }
-            try {
-                Log.d("VisionAPI - file path", imagePath);
-                new analyzeImage(photoId).execute(imagePath);
-            } catch (Exception e) {
-                Log.d("VisionAPI - Exception", e.toString());
+                try {
+                    Log.d("VisionAPI - file path", imagePath);
+                    new analyzeImage(photoId).execute(imagePath);
+                } catch (Exception e) {
+                    Log.d("VisionAPI - Exception", e.toString());
+                }
             }
         }
         mServiceHandler.removeCallbacks(yourRunnable);
