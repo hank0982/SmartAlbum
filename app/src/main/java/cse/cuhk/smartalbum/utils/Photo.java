@@ -5,11 +5,13 @@ import android.app.Service;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 
 import java.util.ArrayList;
 
-public class Photo {
+public class Photo implements Parcelable {
     public int id;
     public String name;
     public String path;
@@ -20,6 +22,26 @@ public class Photo {
         this.path = path;
         this.des = des;
     }
+
+    protected Photo(Parcel in) {
+        id = in.readInt();
+        name = in.readString();
+        path = in.readString();
+        des = in.readString();
+    }
+
+    public static final Creator<Photo> CREATOR = new Creator<Photo>() {
+        @Override
+        public Photo createFromParcel(Parcel in) {
+            return new Photo(in);
+        }
+
+        @Override
+        public Photo[] newArray(int size) {
+            return new Photo[size];
+        }
+    };
+
     public final static ArrayList<String> getAllShownImagesPath(Activity activity) {
 
         Uri uri;
@@ -57,5 +79,18 @@ public class Photo {
         }
         return listOfAllImages;
 
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeString(path);
+        dest.writeString(des);
     }
 }

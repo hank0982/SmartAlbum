@@ -1,5 +1,6 @@
 package cse.cuhk.smartalbum.photodetails.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 
 import android.view.LayoutInflater;
@@ -18,19 +19,22 @@ import androidx.fragment.app.FragmentActivity;
 import cse.cuhk.smartalbum.R;
 import cse.cuhk.smartalbum.photodetails.InfoActivity;
 import cse.cuhk.smartalbum.photodetails.model.Travel;
+import cse.cuhk.smartalbum.utils.GlideApp;
+import cse.cuhk.smartalbum.utils.Photo;
+import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 public class FragmentTop extends Fragment {
 
-    static final String ARG_TRAVEL = "ARG_TRAVEL";
-    Travel travel;
+    static final String ARG_PHOTO = "ARG_PHOTO";
+    int photoid;
 
     private ImageView image;
     private TextView title;
 
-    public static FragmentTop newInstance(Travel travel) {
+    public static FragmentTop newInstance(int photoid) {
         Bundle args = new Bundle();
         FragmentTop fragmentTop = new FragmentTop();
-        args.putParcelable(ARG_TRAVEL, travel);
+        args.putInt(ARG_PHOTO, photoid);
         fragmentTop.setArguments(args);
         return fragmentTop;
     }
@@ -40,7 +44,7 @@ public class FragmentTop extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if (args != null) {
-            travel = args.getParcelable(ARG_TRAVEL);
+            photoid = args.getInt(ARG_PHOTO, -1);
         }
     }
 
@@ -54,17 +58,20 @@ public class FragmentTop extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         this.image = view.findViewById(R.id.photo_details_sharedImage);
         this.title = view.findViewById(R.id.photo_details_fragment_front_title);
-
-        if (travel != null) {
-            image.setImageResource(travel.getImage());
-            title.setText(travel.getName());
+        DBHelper db = new DBHelper(view.getContext());
+        if (photoid != -1) {
+            Cursor res = db.getData(photoid, DBHelper.PHOTOS_TABLE_NAME);
+            res.moveToFirst();
+            Photo photo = DBHelper.convertCursorToPhoto(res);
+            GlideApp.with(view).load(photo.path).into(this.image);
+            title.setText(photo.name);
         }
 
     }
-    private void startInfoActivity(View view, Travel travel) {
+    private void startInfoActivity(View view, Photo photo) {
         FragmentActivity activity = getActivity();
         ActivityCompat.startActivity(activity,
-            InfoActivity.newInstance(activity, travel),
+            InfoActivity.newInstance(activity, photo),
             ActivityOptionsCompat.makeSceneTransitionAnimation(
                 activity,
                 new Pair<>(view, getString(R.string.transition_image)))

@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,15 +50,15 @@ public class AllPhotosFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-    }
-
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
         db = new DBHelper(this.getActivity());
         if(photos == null || photos.isEmpty()){
             photos = db.getAllPhotos();
         }
+    }
+
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.all_photos_fragment, container, false);
         TextView title = view.findViewById(R.id.all_photos_title);
         title.setText(this.title);
@@ -74,7 +75,13 @@ public class AllPhotosFragment extends Fragment {
                 new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         final Intent intent = new Intent(getActivity(), PhotoDetailsActivity.class);
-
+                        ArrayList<Integer> photoids = new ArrayList<>();
+                        for (Photo photo: photos){
+                            photoids.add(photo.id);
+                        }
+                        intent.putExtra(PhotoDetailsActivity.PHOTOS_ARRAY, photoids);
+                        intent.putExtra(PhotoDetailsActivity.PHOTO_ID, position);
+                        Log.d("test", "test");
                         startActivity(intent);
                     }
 
