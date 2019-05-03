@@ -28,11 +28,12 @@ import com.google.gson.Gson;
 import com.microsoft.projectoxford.vision.VisionServiceClient;
 import com.microsoft.projectoxford.vision.VisionServiceRestClient;
 import com.microsoft.projectoxford.vision.contract.AnalysisResult;
-import com.microsoft.projectoxford.vision.contract.Caption;
 import com.microsoft.projectoxford.vision.rest.VisionServiceException;
 
 import cse.cuhk.smartalbum.utils.Photo;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
+
+import static android.os.AsyncTask.Status.FINISHED;
 
 public class InitUpdateService extends Service {
     public static final String GET_IMAGE_PATH_KEY = "image_path_key";
@@ -51,6 +52,7 @@ public class InitUpdateService extends Service {
     private Runnable yourRunnable = new Runnable() {
         @Override
         public void run() {
+
             //DB work here
             ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
 
@@ -58,11 +60,12 @@ public class InitUpdateService extends Service {
                 if(!imagePathSet.contains(imagePath)){
                     imagePathSet.add(imagePath);
                     db.insertPhoto(imagePath, imagePath, "Nothing");
-                    try {
-                       AsyncTask temp = new doRequest(imagePath).execute();
-                    } catch (Exception e) {
-                        Log.d("VisionAPI - Exception", e.toString());
-                    }
+                }
+                try {
+                    Log.d("VisionAPI - file path", imagePath);
+                    new doRequest().execute(imagePath);
+                } catch (Exception e) {
+                    Log.d("VisionAPI - Exception", e.toString());
                 }
             }
             if (mServiceHandler != null)
@@ -81,6 +84,12 @@ public class InitUpdateService extends Service {
             if(!imagePathSet.contains(imagePath)){
                 imagePathSet.add(imagePath);
                 db.insertPhoto(imagePath, imagePath, "Nothing");
+                try {
+                    Log.d("VisionAPI - file path", imagePath);
+                    new doRequest().execute(imagePath);
+                } catch (Exception e) {
+                    Log.d("VisionAPI - Exception", e.toString());
+                }
             }
         }
         mServiceHandler.removeCallbacks(yourRunnable);
@@ -166,12 +175,20 @@ public class InitUpdateService extends Service {
         private Exception e = null;
         private VisionServiceClient client = null;
         private Bitmap imageToAnalyze = null;
+        private String imagePath;
 
-        public doRequest(String imagePath) {
+        public doRequest() {
 
             if (client == null) {
                 client = new VisionServiceRestClient(getString(R.string.subscription_key), getString(R.string.subscription_apiroot));
             }
+
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+
+            imagePath = args[0];
 
             File file = new File(imagePath);
             BitmapFactory.Options options = new BitmapFactory.Options();
@@ -208,10 +225,6 @@ public class InitUpdateService extends Service {
                 }
             }
 
-        }
-
-        @Override
-        protected String doInBackground(String... args) {
             try {
                 return process();
             } catch (Exception e) {
@@ -222,19 +235,34 @@ public class InitUpdateService extends Service {
         }
 
         private String process() throws VisionServiceException, IOException {
+
             Gson gson = new Gson();
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             if (imageToAnalyze != null) {
                 imageToAnalyze.compress(Bitmap.CompressFormat.JPEG, 90, output);
                 ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
 
-                AnalysisResult result = this.client.describe(input, 1);
+
+                AnalysisResult result = client.describe(input, 1);
                 String resultStr = gson.toJson(result);
                 Log.d("VisionAPI - result", resultStr);
                 return resultStr;
+
+                /*
+                try {
+                    AnalysisResult result = client.describe(input, 1);
+                    String resultStr = gson.toJson(result);
+                    Log.d("VisionAPI - result", resultStr);
+                    return resultStr;
+
+                }
+                catch (Exception e) {
+                    Log.d("VisionAPI", e.toString());
+                    return "NOTHING";
+                }
+                */
             }
             else {
-                Log.d("VisionAPI", "imageToAnalyze is null");
                 return "NULL";
             }
         }
@@ -242,8 +270,6 @@ public class InitUpdateService extends Service {
         @Override
         protected void onPostExecute(String data) {
             super.onPostExecute(data);
-            // Display based on error existence
-
             if (e != null) {
                 this.e = null;
             } else {
@@ -254,7 +280,7 @@ public class InitUpdateService extends Service {
                 //}
 
                 for (String tag: result.description.tags) {
-                    Log.d("VisionAPI - tags", tag);
+
                 }
 
             }

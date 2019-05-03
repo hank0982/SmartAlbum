@@ -41,7 +41,7 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
             return options.outWidth / (double) options.outHeight;
 
         }else{
-            Photo pendingDeletePhoto = db.getPhotoByPath(photos.get(getLoopedIndex(index)).path);
+            Photo pendingDeletePhoto = db.getPhotoByPath(photos.get(getLoopedIndex(index % photos.size())).path);
             if(pendingDeletePhoto!=null){
                 db.deleteData(pendingDeletePhoto.id, DBHelper.PHOTOS_TABLE_NAME);
             }
