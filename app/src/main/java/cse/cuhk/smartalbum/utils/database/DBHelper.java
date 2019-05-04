@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
     private static DBHelper single_instance = null;
 
-    private static final int ALBUM_CREATE_NUM = 10;
+    private static final int ALBUM_CREATE_NUM = 3;
 
     public static DBHelper getInstance(Context context)
     {
@@ -66,7 +67,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 13);
+        super(context, DATABASE_NAME , null, 21);
     }
 
     @Override
@@ -133,12 +134,15 @@ public class DBHelper extends SQLiteOpenHelper {
             int newCount = tag.count + 1;
 
             if (newCount == ALBUM_CREATE_NUM) {
-                ArrayList<Photo> photoList = getPhotosByTags(tags);
-                long albumID = insertAlbum(tag.name, photoList.get(0).path, Album.AUTO_ALBUM);
+                ArrayList<Integer> photoIDList = getPhotoIDsByTags(tags);
+                Cursor res = this.getData(photoIDList.get(0), PHOTOS_TABLE_NAME);
+                res.moveToFirst();
+                Photo photo = this.convertCursorToPhoto(res);
+                long albumID = insertAlbum(tag.name, photo.path, Album.AUTO_ALBUM);
                 updateTagAutoAlbumID(tag.id, (int)albumID);
                 idList.add(albumID);
-                for (Photo photo: photoList) {
-                    insertPhotoToAlbum(photo.id, (int)albumID);
+                for (int photoid: photoIDList) {
+                    insertPhotoToAlbum(photoid, (int)albumID);
                 }
             } else if (newCount > ALBUM_CREATE_NUM && tag.autoAlbumID != -1) {
                 idList.add(Long.valueOf(tag.autoAlbumID));
@@ -316,31 +320,31 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public ArrayList<Photo> getPhotosByTags(ArrayList<Tag> tags) {
+    public ArrayList<Integer> getPhotoIDsByTags(ArrayList<Tag> tags) {
 
         StringBuilder tagList = new StringBuilder();
         int tagLen = tags.size();
         for(int i = 0; i < tagLen - 1; i++){
-            tagList.append("'" + tags.get(i).name + "',");
+            tagList.append("" + tags.get(i).id + ",");
         }
-        tagList.append("'" + tags.get(tagLen-1) + "'");
+        tagList.append("" + tags.get(tagLen-1).id + "");
 
-        ArrayList<Photo> photos = new ArrayList<>();
+        ArrayList<Integer> photoIDs = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from PHOTOS where tagname in (?)", new String[] {tagList.toString()});
-        res.moveToFirst();
+        String sql = "select * from PHOTOTAGS where tagid in (" + tagList.toString() +")";
+        Log.d("SQL", sql);
+        Cursor res = db.rawQuery(sql, null);
         if (res.getCount() > 0) {
+            res.moveToFirst();
             while (res.isAfterLast() == false) {
                 int id = res.getInt(res.getColumnIndex(PHOTOS_COLUMN_PHOTOID));
-                String name = res.getString(res.getColumnIndex(PHOTOS_COLUMN_NAME));
-                String imgpath = res.getString(res.getColumnIndex(PHOTOS_COLUMN_PATH));
-                String des = res.getString(res.getColumnIndex(PHOTOS_COLUMN_DES));
-                Photo newPhoto = new Photo(id, name, imgpath, des);
-                photos.add(newPhoto);
+
+                photoIDs.add(id);
+                res.moveToNext();
             }
             res.close();
-            return photos;
+            return photoIDs;
         }
         else {
             res.close();

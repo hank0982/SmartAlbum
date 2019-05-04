@@ -11,12 +11,15 @@ import android.view.View;
 import android.widget.ImageView;
 
 import cse.cuhk.smartalbum.utils.Album;
+import cse.cuhk.smartalbum.utils.Photo;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 
 public class AlbumDetailsActivity extends AppCompatActivity {
 
@@ -43,7 +46,8 @@ public class AlbumDetailsActivity extends AppCompatActivity {
         if(album.name.equals(Album.ALL_PHOTOS_ALBUM_NAME)){
             trans.add(R.id.photo_view_fragment_container, new AllPhotosFragment());
         }else{
-
+            ArrayList<Photo> photos =db.getPhotosInAlbum(albumID);
+            trans.add(R.id.photo_view_fragment_container, new AllPhotosFragment(photos, album.name));
         }
         trans.commit();
     }
