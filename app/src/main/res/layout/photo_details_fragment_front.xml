@@ -14,30 +14,6 @@
         android:scaleType="centerCrop"
         tools:src="@drawable/seychelles" />
 
-    <TextView
-        android:id="@+id/photo_details_fragment_front_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
-        tools:text="Seychelles"
-        android:textSize="7dp"
-        android:textAllCaps="true"
-        android:textColor="@android:color/white" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shadow"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp"
-        android:orientation="horizontal">
-
-    </LinearLayout>
 </RelativeLayout>

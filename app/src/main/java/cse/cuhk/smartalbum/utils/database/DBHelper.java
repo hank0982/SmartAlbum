@@ -67,7 +67,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 21);
+        super(context, DATABASE_NAME , null, 26);
     }
 
     @Override
@@ -261,6 +261,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public boolean insertPhotoToAlbum(int photoID, int albumID) {
         SQLiteDatabase db = this.getWritableDatabase();
+        String query = "SELECT * FROM " + ALBUMPHOTOS_TABLE_NAME + " WHERE " + ALBUMPHOTOS_COLUMN_PHOTOID + "=" + photoID + " AND " + ALBUMPHOTOS_COLUMN_ALBUMID + "=" + albumID;
+        Cursor res = db.rawQuery(query, null);
+        if (res.getCount() > 0) {
+            Log.d("insertPhotoToAlbum", "repeat insertion of photo " + photoID + " in album " + albumID);
+            return false;
+        }
         ContentValues contentValues = new ContentValues();
         contentValues.put("photoid", photoID);
         contentValues.put("albumid", albumID);
@@ -426,6 +432,16 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.delete(tableName,
                 idName+" = ? ",
                 new String[]{Integer.toString(id)});
+    }
+
+    public boolean deleteAlbum(int albumID) {
+        deleteData(albumID, ALBUMS_TABLE_NAME);
+        deleteData(albumID, ALBUMPHOTOS_TABLE_NAME);
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TAGS_COLUMN_AUTO_ALBUM_ID, -1);
+        db.update(TAGS_TABLE_NAME, contentValues, "tagautoalbumid = ? ", new String[] { Integer.toString(albumID) } );
+        return true;
     }
 
     public int numberOfRows(String tableName) {

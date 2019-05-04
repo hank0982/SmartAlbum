@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.transition.Transition;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -42,6 +43,8 @@ public class AlbumDetailsActivity extends AppCompatActivity {
         Cursor res = db.getData(albumID, DBHelper.ALBUMS_TABLE_NAME);
         res.moveToFirst();
         album = DBHelper.convertCursorToAlbum(res);
+
+        Log.d("album name and ID", album.name + " " + albumID);
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
         if(album.name.equals(Album.ALL_PHOTOS_ALBUM_NAME)){
             trans.add(R.id.photo_view_fragment_container, new AllPhotosFragment());

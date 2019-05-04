@@ -20,12 +20,14 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
 
     private final int count;
     private final ArrayList<Album> albums;
-    private final View.OnClickListener listener;
+    private final View.OnClickListener clickListener;
+    private final View.OnLongClickListener longClickListener;
 
-    public SliderAdapter(ArrayList<Album> albums, int count, View.OnClickListener listener) {
+    public SliderAdapter(ArrayList<Album> albums, int count, View.OnClickListener clickListener, View.OnLongClickListener longClickListener) {
         this.albums = albums;
         this.count = count;
-        this.listener = listener;
+        this.clickListener = clickListener;
+        this.longClickListener = longClickListener;
     }
 
     @Override
@@ -34,11 +36,21 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderCard> {
                 .from(parent.getContext())
                 .inflate(R.layout.layout_slider_card, parent, false);
 
-        if (listener != null) {
+        if (clickListener != null) {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    listener.onClick(view);
+                    clickListener.onClick(view);
+                }
+            });
+        }
+
+        if (longClickListener != null) {
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    longClickListener.onLongClick(view);
+                    return false;
                 }
             });
         }

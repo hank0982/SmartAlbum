@@ -29,7 +29,7 @@ public class FragmentTop extends Fragment {
     int photoid;
 
     private ImageView image;
-    private TextView title;
+    // private TextView title;
 
     public static FragmentTop newInstance(int photoid) {
         Bundle args = new Bundle();
@@ -57,14 +57,14 @@ public class FragmentTop extends Fragment {
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.image = view.findViewById(R.id.photo_details_sharedImage);
-        this.title = view.findViewById(R.id.photo_details_fragment_front_title);
+        // this.title = view.findViewById(R.id.photo_details_fragment_front_title);
         DBHelper db = DBHelper.getInstance(view.getContext());
         if (photoid != -1) {
             Cursor res = db.getData(photoid, DBHelper.PHOTOS_TABLE_NAME);
             res.moveToFirst();
             Photo photo = DBHelper.convertCursorToPhoto(res);
             GlideApp.with(view).load(photo.path).into(this.image);
-            title.setText(photo.name);
+            // title.setText(photo.name);
         }
 
     }
