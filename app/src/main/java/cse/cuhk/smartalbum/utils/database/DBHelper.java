@@ -113,6 +113,18 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.insert(ALBUMS_TABLE_NAME, null, contentValues);
     }
 
+    // just a function to insert a tag that has never been created before
+    public Tag insertNewTag(String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TAGS_COLUMN_NAME, name.toLowerCase());
+        contentValues.put(TAGS_COLUMN_COUNT, 0);
+        // always used when manually created (at least for now)
+        contentValues.put(TAGS_COLUMN_MANUALLY_CREATED, 1);
+        contentValues.put(TAGS_COLUMN_AUTO_ALBUM_ID, -1);
+        return new Tag((int)db.insert(TAGS_TABLE_NAME, null, contentValues), name.toLowerCase(), 0, true, -1);
+    }
+
     public ArrayList<Long> insertTag(String name, boolean manuallyCreated) {
         SQLiteDatabase db = this.getWritableDatabase();
         String nameLowerCase = name.toLowerCase();
@@ -319,6 +331,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update(PHOTOS_TABLE_NAME, contentValues, "photoid = ? ", new String[] { Long.toString(photoID) } );
         return true;
     }
+
+
 
     public ArrayList<Integer> getPhotoIDsByTags(ArrayList<Tag> tags) {
 

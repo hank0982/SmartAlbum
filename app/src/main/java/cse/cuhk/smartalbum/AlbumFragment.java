@@ -139,10 +139,7 @@ public class AlbumFragment extends Fragment {
                             for (Chip chip : tagInput.getAllChips()) {
                                 ArrayList<Tag> temp = db.searchTagsByName(chip.getText().toString().toLowerCase(), true);
                                 if (temp == null) {
-                                    ArrayList<Long> temp2 = db.insertTag(chip.getText().toString().toLowerCase(), true);
-                                    db.updateTagCount(temp2.get(0).intValue(), 0);
-                                    Cursor res = db.getData(temp2.get(0).intValue(), db.TAGS_TABLE_NAME);
-                                    tags.add(db.convertCursorToTag(res));
+                                    tags.add(db.insertNewTag(chip.getText().toString().toLowerCase()));
                                 }
                                 else {
                                     tags.add(temp.get(0));
@@ -157,7 +154,7 @@ public class AlbumFragment extends Fragment {
                             res.moveToFirst();
                             Photo photo = db.convertCursorToPhoto(res);
                             long albumID = db.insertAlbum(albumName, photo.path, Album.MANUAL_ALBUM);
-                            Log.d("abum name and id", albumName + " " + albumID);
+                            Log.d("album name and id", albumName + " " + albumID);
                             for (int photoid: photoIDList) {
                                 db.insertPhotoToAlbum(photoid, (int)albumID);
                             }
