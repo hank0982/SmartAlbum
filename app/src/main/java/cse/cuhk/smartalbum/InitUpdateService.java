@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.microsoft.projectoxford.vision.VisionServiceClient;
 import com.microsoft.projectoxford.vision.VisionServiceRestClient;
 import com.microsoft.projectoxford.vision.contract.AnalysisResult;
+import com.microsoft.projectoxford.vision.contract.Caption;
 import com.microsoft.projectoxford.vision.rest.VisionServiceException;
 
 import cse.cuhk.smartalbum.utils.Photo;
@@ -62,7 +63,7 @@ public class InitUpdateService extends Service {
                 long photoId;
                 if (!imagePathSet.contains(imagePath)) {
                     imagePathSet.add(imagePath);
-                    photoId = db.insertPhoto(imagePath, imagePath, "Nothing");
+                    photoId = db.insertPhoto(imagePath, imagePath, "No description available.");
                     counter ++;
                     if(counter < 10){
                         try {
@@ -72,7 +73,6 @@ public class InitUpdateService extends Service {
                             Log.d("VisionAPI - Exception", e.toString());
                         }
                     }
-
                 }
             }
             if (mServiceHandler != null)
@@ -270,12 +270,18 @@ public class InitUpdateService extends Service {
                 Gson gson = new Gson();
                 AnalysisResult result = gson.fromJson(data, AnalysisResult.class);
 
-                //for (Caption caption: result.description.captions) {
-                //}
+                Caption caption = result.description.captions.get(0);
+                if (caption.confidence > 0.6) {
+                    db.updatePhotoDescription(photoId, caption.text);
+                }
+
                 int count = 0;
                 for (String tag: result.description.tags) {
-                    long tagId = db.insertTag(tag, false);
-                    db.insertTagToPhoto(tagId, photoId);
+                    ArrayList<Long> IdList = db.insertTag(tag, false);
+                    db.insertTagToPhoto(IdList.get(0), photoId);
+                    if (IdList.size() == 2) {
+                        db.insertPhotoToAlbum((int)photoId, IdList.get(1).intValue());
+                    }
                     count++;
                     if (count >= 3) {
                         break;
@@ -284,9 +290,5 @@ public class InitUpdateService extends Service {
             }
         }
     }
-
-
-
-
 
 }
