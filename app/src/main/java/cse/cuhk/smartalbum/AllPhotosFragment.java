@@ -1,6 +1,8 @@
 package cse.cuhk.smartalbum;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -29,8 +31,11 @@ import com.fivehundredpx.greedolayout.GreedoLayoutManager;
 import com.fivehundredpx.greedolayout.GreedoSpacingItemDecoration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import cse.cuhk.smartalbum.photodetails.PhotoDetailsActivity;
+import cse.cuhk.smartalbum.utils.Album;
 import cse.cuhk.smartalbum.utils.MeasUtils;
 import cse.cuhk.smartalbum.utils.Photo;
 import cse.cuhk.smartalbum.utils.RecyclerItemClickListener;
@@ -66,7 +71,7 @@ public class AllPhotosFragment extends Fragment {
         title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
         PhotoViewAdaptor recyclerAdapter = new PhotoViewAdaptor(this.getActivity(), photos);
 
-        GreedoLayoutManager layoutManager = new GreedoLayoutManager(recyclerAdapter);
+        final GreedoLayoutManager layoutManager = new GreedoLayoutManager(recyclerAdapter);
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.photo_view);
         recyclerView.setLayoutManager(layoutManager);
@@ -86,7 +91,51 @@ public class AllPhotosFragment extends Fragment {
                     }
 
                     @Override public void onLongItemClick(View view, int position) {
-
+                        final int photoID = photos.get(position).id;
+                        ArrayList<Album> albums = db.getAllAlbums();
+                        final Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+                        final CharSequence[] albumCharSeq = new CharSequence[albums.size()];
+                        int i = 0;
+                        for (Album album: albums) {
+                            albumCharSeq[i] = album.name;
+                            map.put(i, album.id);
+                            i++;
+                        }
+                        final ArrayList<Integer> selectedAlbums = new ArrayList<>();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setTitle("Add this photo to album(s)");
+                        builder.setMultiChoiceItems(albumCharSeq, null, new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                if (isChecked) {
+                                    selectedAlbums.add(which);
+                                }
+                                else if (selectedAlbums.contains(which)) {
+                                    selectedAlbums.remove(Integer.valueOf(which));
+                                }
+                            }
+                        }).setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                for (Integer index: selectedAlbums) {
+                                    if (map == null) {
+                                        Log.d("Map", "null");
+                                        return;
+                                    }
+                                    Integer albumID = map.get(index);
+                                    if (albumID == null) {
+                                        Log.d("AlbumID", "null");
+                                        return;
+                                    }
+                                    db.insertPhotoToAlbum(photoID, albumID.intValue());
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                        builder.create().show();
                     }
                 })
         );
