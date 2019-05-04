@@ -50,7 +50,7 @@ public class AllPhotosFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = new DBHelper(this.getActivity());
+        db = DBHelper.getInstance(this.getContext());
         if(photos == null || photos.isEmpty()){
             photos = db.getAllPhotos();
         }

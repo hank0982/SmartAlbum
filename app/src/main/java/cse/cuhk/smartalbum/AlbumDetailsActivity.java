@@ -28,7 +28,7 @@ public class AlbumDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = new DBHelper(this.getBaseContext());
+        db = DBHelper.getInstance(getBaseContext());
         setContentView(R.layout.activity_details);
 
         final int albumID = getIntent().getIntExtra(BUNDLE_IMAGE_ID, -999);

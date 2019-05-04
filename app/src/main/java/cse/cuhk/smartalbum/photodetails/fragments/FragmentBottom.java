@@ -1,11 +1,10 @@
 package cse.cuhk.smartalbum.photodetails.fragments;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.KeyListener;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,10 @@ import androidx.fragment.app.Fragment;
 
 import com.hootsuite.nachos.NachoTextView;
 import com.hootsuite.nachos.chip.Chip;
+import com.hootsuite.nachos.chip.ChipInfo;
 import com.hootsuite.nachos.terminator.ChipTerminatorHandler;
-import com.hootsuite.nachos.validator.ChipifyingNachoValidator;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +32,6 @@ public class FragmentBottom extends Fragment {
     static final String ARG_PHOTO = "ARG_PHOTO";
     int photoid;
     private DBHelper db;
-    Set<Chip> tagChips = new HashSet<>();
     public static FragmentBottom newInstance(int photoid) {
         Bundle args = new Bundle();
         FragmentBottom fragmentBottom = new FragmentBottom();
@@ -43,52 +42,99 @@ public class FragmentBottom extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = new DBHelper(this.getActivity());
+        db =  DBHelper.getInstance(getActivity());
         Bundle args = getArguments();
         if (args != null) {
             photoid = args.getInt(ARG_PHOTO, -1);
         }
     }
+    private void updateTags( Set<Chip> newChips, Set<Chip> oldChips){
+        ArrayList<Chip> pendingRemoveChip = new ArrayList<>();
+        for(Chip oldChip: oldChips){
+            if(!newChips.contains(oldChip)){
+                pendingRemoveChip.add(oldChip);
+                ArrayList<Tag> tag = db.searchTagsByName(oldChip.getText().toString(), true);
+                db.removeTagFromPhoto(tag.get(0).id, photoid);
+            }
+        }
+        oldChips.removeAll(pendingRemoveChip);
+
+        for(Chip newChip: newChips){
+            if(!oldChips.contains(newChip)){
+                oldChips.add(newChip);
+                ArrayList<Tag> tag = db.searchTagsByName(newChip.getText().toString(), true);
+                if(tag != null){
+                    db.insertTagToPhoto(tag.get(0).id, photoid);
+                    db.updateTagCount(tag.get(0).id, tag.get(0).count+1);
+                }else{
+                    long rowID = db.insertTag(newChip.getText().toString(), true);
+                    db.insertTagToPhoto((int) rowID, photoid);
+                }
+            }
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.photo_details_fragment_bottom, container, false);
         final NachoTextView nachoView = view.findViewById(R.id.photo_details_bottom_nacho_text_view);
-        nachoView.setSaveEnabled(false);
-        nachoView.addChipTerminator(' ', ChipTerminatorHandler.BEHAVIOR_CHIPIFY_ALL);
-        nachoView.addTextChangedListener(new TextWatcher() {
-
-            public void afterTextChanged(Editable s) {}
-
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-                Set<Chip>newChips = new HashSet<>(nachoView.getAllChips());
-                for(Chip oldChip: tagChips){
-                    if(!newChips.contains(oldChip)){
-                        tagChips.remove(oldChip);
-                        ArrayList<Tag> tag = db.searchTagsByName(oldChip.getText().toString(), true);
-                        db.removeTagFromPhoto(tag.get(0).id, photoid);
-                    }
+        new analyzeImage(photoid){
+            @Override
+            protected void onPostExecute(ArrayList<Tag> data) {
+                super.onPostExecute(data);
+                ArrayList<ChipInfo> chips = new ArrayList<>();
+                for(Tag tag: data){
+                    Log.d("TAG",tag.name);
+                    chips.add(new ChipInfo(tag.name, tag.id));
                 }
-                for(Chip newChip: newChips){
-                    if(!tagChips.contains(newChip)){
-                        tagChips.add(newChip);
-                        ArrayList<Tag> tag = db.searchTagsByName(newChip.getText().toString(), true);
-                        if(tag != null){
-                            db.insertTagToPhoto(tag.get(0).id, photoid);
-                            db.updateTagCount(tag.get(0).id, tag.get(0).count+1);
-                        }else{
-                            long rowID = db.insertTag(newChip.getText().toString(), true);
-                            db.insertTagToPhoto((int) rowID, photoid);
-                        }
-                    }
-                }
+                nachoView.setTextWithChips(chips);
+
+                nachoView.setSaveEnabled(false);
+                nachoView.addChipTerminator(' ', ChipTerminatorHandler.BEHAVIOR_CHIPIFY_ALL);
+//                nachoView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//                    @Override
+//                    public void onFocusChange(View view, boolean hasFocus) {
+//                        Log.d("Focus","FOCUS CHANGE");
+//                        if (!hasFocus) {
+//                            Set<Chip> oldChips = new HashSet<>(nachoView.getAllChips());
+//                            new analyzeImage(new HashSet<>(nachoView.getAllChips()), oldChips).execute("UPDATE_TAGS");
+//                        }
+//                    }
+//                });
+
+
             }
-        });
+        }.execute("LOAD_TAG_FROM_DB");
+
         return view;
     }
+    private class analyzeImage extends AsyncTask<String, String, ArrayList<Tag>> {
+        // Store error message
+        private Exception e = null;
+        private int photoId;
+        private Set<Chip> newChips;
+        private Set<Chip> oldChips;
 
+        private int sleepTime = 3000;
+
+        public analyzeImage(int photoId) {
+            this.photoId = photoId;
+        }
+        public analyzeImage(Set<Chip> newChips, Set<Chip> oldChips){
+            this.newChips = newChips;
+            this.oldChips = oldChips;
+        }
+        @Override
+        protected ArrayList<Tag> doInBackground(String... strings) {
+            Log.d("DOBACK", strings[0]);
+            if(strings[0].equals("LOAD_TAG_FROM_DB")){
+                ArrayList<Tag> tags = db.getTagsFromPhoto(this.photoId);
+                return tags;
+            }else{
+                updateTags(newChips, oldChips);
+                return new ArrayList<Tag>();
+            }
+
+        }
+    }
 }

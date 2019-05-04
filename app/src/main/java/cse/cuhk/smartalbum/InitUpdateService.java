@@ -98,7 +98,7 @@ public class InitUpdateService extends Service {
         // get all imagesPath from database
         imagePathSet = new HashSet<>();
 
-        db = new DBHelper(this);
+        db =  DBHelper.getInstance(this);
         ArrayList<Photo> photos = db.getAllPhotos();
         for(Photo photo: photos){
             imagePathSet.add(photo.path);

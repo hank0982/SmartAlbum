@@ -61,7 +61,7 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
     public PhotoViewAdaptor(Context context, ArrayList<Photo> photos) {
         this.photos = photos;
         mContext = context;
-        db = new DBHelper(context);
+        db =  DBHelper.getInstance(context);
     }
     @Override
     public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

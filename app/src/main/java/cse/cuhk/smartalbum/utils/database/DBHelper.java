@@ -52,8 +52,17 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PHOTOTAGS_COLUMN_PHOTOTAGSID = "phototagid";
     public static final String PHOTOTAGS_COLUMN_PHOTOID = "photoid";
     public static final String PHOTOTAGS_COLUMN_TAGID = "tagid";
-    public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 11);
+    private static DBHelper single_instance = null;
+    public static DBHelper getInstance(Context context)
+    {
+        if (single_instance == null)
+            single_instance = new DBHelper(context);
+
+        return single_instance;
+    }
+
+    private DBHelper(Context context) {
+        super(context, DATABASE_NAME , null, 12);
     }
 
     @Override

@@ -58,7 +58,7 @@ public class FragmentTop extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         this.image = view.findViewById(R.id.photo_details_sharedImage);
         this.title = view.findViewById(R.id.photo_details_fragment_front_title);
-        DBHelper db = new DBHelper(view.getContext());
+        DBHelper db = DBHelper.getInstance(view.getContext());
         if (photoid != -1) {
             Cursor res = db.getData(photoid, DBHelper.PHOTOS_TABLE_NAME);
             res.moveToFirst();

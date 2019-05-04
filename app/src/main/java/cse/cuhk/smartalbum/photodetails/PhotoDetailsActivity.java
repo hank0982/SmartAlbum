@@ -54,7 +54,7 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = new DBHelper(this);
+        db =  DBHelper.getInstance(getBaseContext());
         setContentView(R.layout.photo_details_main);
         viewPager = findViewById(R.id.photo_details_viewPager);
         back = findViewById(R.id.photo_details_back);

@@ -78,7 +78,7 @@ public class AlbumFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.album_fragment, container, false);
-        db = new DBHelper(this.getActivity());
+        db =  DBHelper.getInstance(getActivity());
         ArrayList<Album> albums = db.getAllAlbums();
         for(Album album: albums) {
 
