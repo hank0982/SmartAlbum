@@ -65,7 +65,7 @@ public class InitUpdateService extends Service {
                     imagePathSet.add(imagePath);
                     photoId = db.insertPhoto(imagePath, imagePath, "No description available.");
                     counter ++;
-                    if(counter < 10){
+                    if(counter <= 10){
                         try {
                             Log.d("VisionAPI - file path", imagePath);
                             new analyzeImage(photoId).executeOnExecutor(SERIAL_EXECUTOR,imagePath);
@@ -170,7 +170,7 @@ public class InitUpdateService extends Service {
         private Exception e = null;
         private Bitmap imageToAnalyze = null;
         private long photoId;
-        private int sleepTime = 3000;
+        private int sleepTime = 3500;
 
         public analyzeImage(long photoId) {
             this.photoId = photoId;
@@ -269,11 +269,13 @@ public class InitUpdateService extends Service {
             } else {
                 Gson gson = new Gson();
                 AnalysisResult result = gson.fromJson(data, AnalysisResult.class);
-
-                Caption caption = result.description.captions.get(0);
-                if (caption.confidence > 0.6) {
-                    db.updatePhotoDescription(photoId, caption.text);
+                if(result.description.captions.size() >0){
+                    Caption caption = result.description.captions.get(0);
+                    if (caption.confidence > 0.6) {
+                        db.updatePhotoDescription(photoId, caption.text);
+                    }
                 }
+
 
                 int count = 0;
                 for (String tag: result.description.tags) {
