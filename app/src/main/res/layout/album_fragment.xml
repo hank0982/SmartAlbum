@@ -36,16 +36,18 @@
                 android:textStyle="bold"
                 android:layout_gravity="center_vertical"/>
 
-            <TextView
-                android:id="@+id/see_all_user_album"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageButton
+                android:id="@+id/add_album_button"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_alignBottom="@+id/countries"
                 android:layout_gravity="end"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="20dp"
-                android:text="See All"
-                tools:text="See All" />
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="40dp"
+                android:layout_marginRight="30dp"
+                android:background="#0000"
+                app:srcCompat="@drawable/add" />
+
         </FrameLayout>
 
 

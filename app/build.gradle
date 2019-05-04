@@ -44,7 +44,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation project(':card-slider-0.3.1')
     implementation 'com.microsoft.projectoxford:vision:1.0.395'
-
+    implementation 'com.google.android.material:material:1.0.0'
 
     // TODO remove temporary fix for Glide compiler issue
 // Temporary fix begin
@@ -53,7 +53,6 @@ dependencies {
 // Temporary fix end
     implementation project(path: ':library')
     implementation "com.hootsuite.android:nachos:1.1.1"
-
 
 
 }

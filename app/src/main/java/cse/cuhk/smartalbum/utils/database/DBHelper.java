@@ -322,6 +322,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public ArrayList<Integer> getPhotoIDsByTags(ArrayList<Tag> tags) {
 
+        if (tags.size() == 0) {
+            return null;
+        }
+
         StringBuilder tagList = new StringBuilder();
         int tagLen = tags.size();
         for(int i = 0; i < tagLen - 1; i++){

@@ -1,44 +1,45 @@
 package cse.cuhk.smartalbum;
 
-import android.Manifest;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.hootsuite.nachos.NachoTextView;
+import com.hootsuite.nachos.chip.Chip;
+import com.hootsuite.nachos.terminator.ChipTerminatorHandler;
 import com.ramotion.cardslider.CardSliderLayoutManager;
 import com.ramotion.cardslider.CardSnapHelper;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 import cse.cuhk.smartalbum.cards.SliderAdapter;
 import cse.cuhk.smartalbum.utils.Album;
 import cse.cuhk.smartalbum.utils.Photo;
+import cse.cuhk.smartalbum.utils.Tag;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 public class AlbumFragment extends Fragment {
@@ -83,6 +84,7 @@ public class AlbumFragment extends Fragment {
         for(Album album: albums) {
 
             if(album.type.equals(Album.MANUAL_ALBUM)){
+                Log.d("print album id and name", album.name + " " + album.id);
                 manulAlbums.add(album);
             }else{
                 autoAlbums.add(album);
@@ -111,6 +113,91 @@ public class AlbumFragment extends Fragment {
         sliderAdapter_two = new SliderAdapter(autoAlbums, autoAlbums.size(), new AlbumFragment.OnCardClickListener(2));
         initRecyclerView(view);
         initTitleText(view);
+
+        final ImageButton addAlbumButton = view.findViewById(R.id.add_album_button);
+        addAlbumButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Add a new album");
+                View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_album, (ViewGroup)getView(), false);
+                final EditText albumInput = (EditText) viewInflated.findViewById(R.id.album_title_input);
+                final NachoTextView tagInput = (NachoTextView) viewInflated.findViewById(R.id.album_tags_input);
+                tagInput.addChipTerminator(' ', ChipTerminatorHandler.BEHAVIOR_CHIPIFY_ALL);
+                builder.setView(viewInflated);
+
+                builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (TextUtils.isEmpty(albumInput.getText())) {
+                            albumInput.setError("Album name is required");
+                        }
+                        else {
+                            String albumName = albumInput.getText().toString();
+                            ArrayList<Tag> tags = new ArrayList<>();
+
+                            for (Chip chip : tagInput.getAllChips()) {
+                                ArrayList<Tag> temp = db.searchTagsByName(chip.getText().toString().toLowerCase(), true);
+                                if (temp == null) {
+                                    ArrayList<Long> temp2 = db.insertTag(chip.getText().toString().toLowerCase(), true);
+                                    db.updateTagCount(temp2.get(0).intValue(), 0);
+                                    Cursor res = db.getData(temp2.get(0).intValue(), db.TAGS_TABLE_NAME);
+                                    tags.add(db.convertCursorToTag(res));
+                                }
+                                else {
+                                    tags.add(temp.get(0));
+                                }
+                            }
+
+                            ArrayList<Integer> photoIDList = db.getPhotoIDsByTags(tags);
+                            if (photoIDList == null) {
+                                return;
+                            }
+                            Cursor res = db.getData(photoIDList.get(0), db.PHOTOS_TABLE_NAME);
+                            res.moveToFirst();
+                            Photo photo = db.convertCursorToPhoto(res);
+                            long albumID = db.insertAlbum(albumName, photo.path, Album.MANUAL_ALBUM);
+                            Log.d("abum name and id", albumName + " " + albumID);
+                            for (int photoid: photoIDList) {
+                                db.insertPhotoToAlbum(photoid, (int)albumID);
+                            }
+                        }
+                    }
+                });
+
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                final Button button = builder.show().getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setEnabled(false);
+                albumInput.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (albumInput.getText().length() > 0) {
+                            button.setEnabled(true);
+                        }
+                        else {
+                            button.setEnabled(false);
+                        }
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
+            }
+        });
+
         return view;
 
     }
@@ -210,9 +297,16 @@ public class AlbumFragment extends Fragment {
                 clickedPosition = secondRecyclerView.getChildAdapterPosition(view);
             }
             if (clickedPosition == activeCardPosition) {
+
+                for (Album album: manulAlbums) {
+                    Log.d("album name and id", album.name + " " + album.id);
+                }
+                Log.d("active card position", String.valueOf(activeCardPosition));
+
                 final Intent intent = new Intent(getActivity(), AlbumDetailsActivity.class);
                 if(row == 1){
                     intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
+                    Log.d("clickedPosition == activeCardPosition ID?", String.valueOf(manulAlbums.get(activeCardPosition % manulAlbums.size()).id));
                 }else{
                     intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
                 }
@@ -227,6 +321,12 @@ public class AlbumFragment extends Fragment {
                     startActivity(intent, options.toBundle());
                 }
             } else if (clickedPosition > activeCardPosition) {
+
+                for (Album album: manulAlbums) {
+                    Log.d("album name and id", album.name + " " + album.id);
+                }
+                Log.d("active card position", String.valueOf(activeCardPosition));
+
                 if(row == 1){
                     firstRecyclerView.smoothScrollToPosition(clickedPosition);
                 }else{
@@ -235,6 +335,7 @@ public class AlbumFragment extends Fragment {
                 final Intent intent = new Intent(getActivity(), AlbumDetailsActivity.class);
                 if(row == 1){
                     intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
+                    Log.d("clickedPosition > activeCardPosition ID?", String.valueOf(manulAlbums.get(activeCardPosition % manulAlbums.size()).id));
                 }else{
                     intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
                 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="20dp"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/album_title_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter a name for the album"
+        android:inputType="text" />
+
+    <com.hootsuite.nachos.NachoTextView
+        android:id="@+id/album_tags_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter tags for the album"
+        app:chipTextSize="16dp"
+        app:chipHeight="30dp"
+        app:chipVerticalSpacing="3dp"/>
+
+</LinearLayout>

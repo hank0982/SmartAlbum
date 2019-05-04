@@ -119,8 +119,6 @@ public class FragmentBottom extends Fragment {
         private Set<Chip> newChips;
         private Set<Chip> oldChips;
 
-        private int sleepTime = 3000;
-
         public analyzeImage(int photoId) {
             this.photoId = photoId;
         }
