@@ -239,7 +239,6 @@ public class AlbumFragment extends Fragment {
                     intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
                 }
                 startActivity(intent);
-
             }
         }
     }

@@ -35,7 +35,6 @@ import cse.cuhk.smartalbum.utils.Photo;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
-import static android.os.AsyncTask.Status.FINISHED;
 
 public class InitUpdateService extends Service {
     public static final String GET_IMAGE_PATH_KEY = "image_path_key";
