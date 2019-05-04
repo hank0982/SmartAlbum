@@ -54,6 +54,7 @@ public class FragmentBottom extends Fragment {
             if(!newChips.contains(oldChip)){
                 pendingRemoveChip.add(oldChip);
                 ArrayList<Tag> tag = db.searchTagsByName(oldChip.getText().toString(), true);
+                Log.d("aboutToDeletedTag", tag.get(0).name);
                 db.removeTagFromPhoto(tag.get(0).id, photoid);
             }
         }
@@ -67,8 +68,11 @@ public class FragmentBottom extends Fragment {
                     db.insertTagToPhoto(tag.get(0).id, photoid);
                     db.updateTagCount(tag.get(0).id, tag.get(0).count+1);
                 }else{
-                    long rowID = db.insertTag(newChip.getText().toString(), true);
-                    db.insertTagToPhoto((int) rowID, photoid);
+                    ArrayList<Long> rowIDs = db.insertTag(newChip.getText().toString(), true);
+                    db.insertTagToPhoto(rowIDs.get(0), photoid);
+                    if(rowIDs.size()==2){
+                        db.insertPhotoToAlbum(photoid, rowIDs.get(1).intValue());
+                    }
                 }
             }
         }
@@ -88,19 +92,19 @@ public class FragmentBottom extends Fragment {
                     chips.add(new ChipInfo(tag.name, tag.id));
                 }
                 nachoView.setTextWithChips(chips);
+                final Set<Chip> oldChips = new HashSet<>(nachoView.getAllChips());
 
                 nachoView.setSaveEnabled(false);
                 nachoView.addChipTerminator(' ', ChipTerminatorHandler.BEHAVIOR_CHIPIFY_ALL);
-//                nachoView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//                    @Override
-//                    public void onFocusChange(View view, boolean hasFocus) {
-//                        Log.d("Focus","FOCUS CHANGE");
-//                        if (!hasFocus) {
-//                            Set<Chip> oldChips = new HashSet<>(nachoView.getAllChips());
-//                            new analyzeImage(new HashSet<>(nachoView.getAllChips()), oldChips).execute("UPDATE_TAGS");
-//                        }
-//                    }
-//                });
+                nachoView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                    @Override
+                    public void onFocusChange(View view, boolean hasFocus) {
+                        if (!hasFocus) {
+                            Log.d("Focus","FOCUS CHANGE");
+                            new analyzeImage(new HashSet<>(nachoView.getAllChips()), oldChips).execute("UPDATE_TAGS");
+                        }
+                    }
+                });
 
 
             }
@@ -131,6 +135,8 @@ public class FragmentBottom extends Fragment {
                 ArrayList<Tag> tags = db.getTagsFromPhoto(this.photoId);
                 return tags;
             }else{
+                Log.d("newchips", String.valueOf(newChips));
+                Log.d("oldchips", String.valueOf(oldChips));
                 updateTags(newChips, oldChips);
                 return new ArrayList<Tag>();
             }
