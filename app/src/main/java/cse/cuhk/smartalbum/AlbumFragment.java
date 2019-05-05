@@ -92,9 +92,11 @@ public class AlbumFragment extends Fragment {
         }
         if(manulAlbums.isEmpty()){
             if(db.getAllPhotos() != null && db.getAllPhotos().size() != 0){
-                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME,db.getAllPhotos().get(0).path, Album.MANUAL_ALBUM);
+                ArrayList<Photo> photoTemp = db.getAllPhotos();
+                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME, photoTemp.get(photoTemp.size()-1).path, Album.MANUAL_ALBUM);
             }else{
-                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME, Photo.getAllShownImagesPath(getActivityFromContext(container.getContext())).get(0),  Album.MANUAL_ALBUM);
+                ArrayList<String> photoPathTemp = Photo.getAllShownImagesPath(getActivityFromContext(container.getContext()));
+                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME, photoPathTemp.get(photoPathTemp.size()-1),  Album.MANUAL_ALBUM);
             }
             albums = db.getAllAlbums();
             manulAlbums.clear();
@@ -105,7 +107,6 @@ public class AlbumFragment extends Fragment {
                 }else{
                     autoAlbums.add(album);
                 }
-
             }
         }
         sliderAdapter = new SliderAdapter(manulAlbums, manulAlbums.size(), new AlbumFragment.OnCardClickListener(1), new AlbumFragment.OnCardLongClickListener(1));
@@ -149,7 +150,7 @@ public class AlbumFragment extends Fragment {
                             if (photoIDList == null) {
                                 return;
                             }
-                            Cursor res = db.getData(photoIDList.get(0), db.PHOTOS_TABLE_NAME);
+                            Cursor res = db.getData(photoIDList.get(photoIDList.size()-1), db.PHOTOS_TABLE_NAME);
                             res.moveToFirst();
                             Photo photo = db.convertCursorToPhoto(res);
                             long albumID = db.insertAlbum(albumName, photo.path, Album.MANUAL_ALBUM);
@@ -173,9 +174,7 @@ public class AlbumFragment extends Fragment {
                 albumInput.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
                     }
-
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (albumInput.getText().length() > 0) {
@@ -185,10 +184,8 @@ public class AlbumFragment extends Fragment {
                             button.setEnabled(false);
                         }
                     }
-
                     @Override
                     public void afterTextChanged(Editable s) {
-
                     }
                 });
             }
