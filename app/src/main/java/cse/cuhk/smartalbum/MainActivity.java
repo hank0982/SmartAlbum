@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         }else{
             sendImageListToService();
             FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-            trans.add(R.id.fragment_container, new AlbumFragment());
+            trans.replace(R.id.fragment_container, new AlbumFragment());
             trans.commit();
             initMenu();
         }

@@ -287,6 +287,7 @@ public class DBHelper extends SQLiteOpenHelper {
             array_list.add(newPhoto);
             res.moveToNext();
         }
+        res.close();
         return array_list;
     }
 
