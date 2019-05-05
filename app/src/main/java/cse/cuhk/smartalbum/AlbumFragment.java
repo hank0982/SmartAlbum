@@ -92,9 +92,11 @@ public class AlbumFragment extends Fragment {
         }
         if(manulAlbums.isEmpty()){
             if(db.getAllPhotos() != null && db.getAllPhotos().size() != 0){
-                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME,db.getAllPhotos().get(0).path, Album.MANUAL_ALBUM);
+                ArrayList<Photo> photoTemp = db.getAllPhotos();
+                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME, photoTemp.get(photoTemp.size()-1).path, Album.MANUAL_ALBUM);
             }else{
-                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME, Photo.getAllShownImagesPath(getActivityFromContext(container.getContext())).get(0),  Album.MANUAL_ALBUM);
+                ArrayList<String> photoPathTemp = Photo.getAllShownImagesPath(getActivityFromContext(container.getContext()));
+                db.insertAlbum(Album.ALL_PHOTOS_ALBUM_NAME, photoPathTemp.get(photoPathTemp.size()-1),  Album.MANUAL_ALBUM);
             }
             albums = db.getAllAlbums();
             manulAlbums.clear();
@@ -105,7 +107,6 @@ public class AlbumFragment extends Fragment {
                 }else{
                     autoAlbums.add(album);
                 }
-
             }
         }
         sliderAdapter = new SliderAdapter(manulAlbums, manulAlbums.size(), new AlbumFragment.OnCardClickListener(1), new AlbumFragment.OnCardLongClickListener(1));
@@ -149,7 +150,7 @@ public class AlbumFragment extends Fragment {
                             if (photoIDList == null) {
                                 return;
                             }
-                            Cursor res = db.getData(photoIDList.get(0), db.PHOTOS_TABLE_NAME);
+                            Cursor res = db.getData(photoIDList.get(photoIDList.size()-1), db.PHOTOS_TABLE_NAME);
                             res.moveToFirst();
                             Photo photo = db.convertCursorToPhoto(res);
                             long albumID = db.insertAlbum(albumName, photo.path, Album.MANUAL_ALBUM);
@@ -174,9 +175,7 @@ public class AlbumFragment extends Fragment {
                 albumInput.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
                     }
-
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (albumInput.getText().length() > 0) {
@@ -186,10 +185,8 @@ public class AlbumFragment extends Fragment {
                             button.setEnabled(false);
                         }
                     }
-
                     @Override
                     public void afterTextChanged(Editable s) {
-
                     }
                 });
             }
@@ -337,13 +334,18 @@ public class AlbumFragment extends Fragment {
 
         }
 
-        public void showDialog(String albumName, final int albumID) {
+        public void showDialog(String albumName, final int albumID, boolean isAutoAlbum) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Are you sure you want to delete the " + albumName + " album?").setTitle("Delete album?");
+            if (isAutoAlbum) {
+                builder.setMessage("Are you sure you want to delete the " + albumName + " album? We will not automatically create this album again.").setTitle("Delete album?");
+            } else {
+                builder.setMessage("Are you sure you want to delete the " + albumName + " album?").setTitle("Delete album?");
+            }
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     db.deleteAlbum(albumID);
+                    ((MainActivity) getActivity()).reloadFragment();
                 }
             });
             builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -386,11 +388,11 @@ public class AlbumFragment extends Fragment {
                         builder.create().show();
                     }
                     else {
-                        showDialog(album.name, album.id);
+                        showDialog(album.name, album.id, false);
                     }
                 }else{
                     final Album album = autoAlbums.get(activeCardPosition % autoAlbums.size());
-                    showDialog(album.name, album.id);
+                    showDialog(album.name, album.id, true);
                 }
             } else if (clickedPosition > activeCardPosition) {
                 if(row == 1){
@@ -399,18 +401,18 @@ public class AlbumFragment extends Fragment {
                     secondRecyclerView.smoothScrollToPosition(clickedPosition);
                 }
                 if(row == 1){
-                    final Album album = manulAlbums.get(activeCardPosition % manulAlbums.size());
+                    final Album album = manulAlbums.get(clickedPosition % manulAlbums.size());
                     if (album.name.equals(Album.ALL_PHOTOS_ALBUM_NAME)) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         builder.setMessage("All Photos album cannot be deleted");
                         builder.create().show();
                     }
                     else {
-                        showDialog(album.name, album.id);
+                        showDialog(album.name, album.id, false);
                     }
                 }else{
-                    final Album album = autoAlbums.get(activeCardPosition % autoAlbums.size());
-                    showDialog(album.name, album.id);
+                    final Album album = autoAlbums.get(clickedPosition % autoAlbums.size());
+                    showDialog(album.name, album.id, true);
                 }
             }
             return true;

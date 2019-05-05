@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import cse.cuhk.smartalbum.MainActivity;
 import cse.cuhk.smartalbum.R;
 import cse.cuhk.smartalbum.utils.Tag;
 import cse.cuhk.smartalbum.utils.database.DBHelper;
@@ -71,7 +72,11 @@ public class FragmentBottom extends Fragment {
                     ArrayList<Long> rowIDs = db.insertTag(newChip.getText().toString(), true);
                     db.insertTagToPhoto(rowIDs.get(0), photoid);
                     if(rowIDs.size()==2){
-                        db.insertPhotoToAlbum(photoid, rowIDs.get(1).intValue());
+                        boolean result = db.insertPhotoToAlbum(photoid, rowIDs.get(1).intValue());
+                        if (result) {
+                            db.updateAlbumCoverPhoto(photoid, rowIDs.get(1).intValue());
+                            ((MainActivity) getActivity()).reloadFragment();
+                        }
                     }
                 }
             }

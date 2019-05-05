@@ -140,7 +140,10 @@ public class AllPhotosFragment extends Fragment {
                                         Log.d("AlbumID", "null");
                                         return;
                                     }
-                                    db.insertPhotoToAlbum(photoID, albumID.intValue());
+                                    boolean result = db.insertPhotoToAlbum(photoID, albumID);
+                                    if (result) {
+                                        db.updateAlbumCoverPhoto(photoID, albumID);
+                                    }
                                 }
                             }
                         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
