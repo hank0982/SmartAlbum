@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -15,6 +18,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
@@ -23,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 
 import com.google.gson.Gson;
 import com.microsoft.projectoxford.vision.VisionServiceClient;
@@ -97,7 +103,7 @@ public class InitUpdateService extends Service {
         // get all imagesPath from database
         imagePathSet = new HashSet<>();
 
-        db =  DBHelper.getInstance(this);
+        db = DBHelper.getInstance(this);
         ArrayList<Photo> photos = db.getAllPhotos();
         for(Photo photo: photos){
             imagePathSet.add(photo.path);
@@ -170,6 +176,7 @@ public class InitUpdateService extends Service {
         private Bitmap imageToAnalyze = null;
         private long photoId;
         private int sleepTime = 3500;
+        private String imagePath;
 
         public analyzeImage(long photoId) {
             this.photoId = photoId;
@@ -177,7 +184,7 @@ public class InitUpdateService extends Service {
 
         @Override
         protected String doInBackground(String... args) {
-            String imagePath = args[0];
+            imagePath = args[0];
 
             File file = new File(imagePath);
             BitmapFactory.Options options = new BitmapFactory.Options();
@@ -275,7 +282,6 @@ public class InitUpdateService extends Service {
                     }
                 }
 
-
                 int count = 0;
                 for (String tag: result.description.tags) {
                     ArrayList<Long> IdList = db.insertTag(tag, false);
@@ -291,8 +297,50 @@ public class InitUpdateService extends Service {
                         break;
                     }
                 }
+
+                double latitude = -1, longitude = -1;
+                try {
+                    ExifInterface exifInterface = new ExifInterface(imagePath);
+                    float[] temp2 = new float[2];
+                    if (exifInterface.getLatLong(temp2)) {
+                        latitude = temp2[0];
+                        longitude = temp2[1];
+                        Pair<String, String> countryCity = getCountryCityName(latitude, longitude);
+                        insertTagHelper((int)photoId, countryCity.first);
+                        insertTagHelper((int)photoId, countryCity.second);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
         }
+
+
+        private void insertTagHelper(int photoID, String name) {
+            ArrayList<Long> IdList = db.insertTag(name.replaceAll(" ", ""), false);
+            if (db.insertTagToPhoto(IdList.get(0), photoID)) {
+                if (IdList.size() == 2) {
+                    boolean insertRes = db.insertPhotoToAlbum(photoID, IdList.get(1).intValue());
+                    if (insertRes) {
+                        db.updateAlbumCoverPhoto(photoID, IdList.get(1).intValue());
+                    }
+                }
+            }
+        }
+
+        public Pair<String, String> getCountryCityName(double lat, double lng) {
+            Geocoder geocoder = new Geocoder(InitUpdateService.this, Locale.getDefault());
+            List<Address> addresses = null;
+            try {
+                addresses = geocoder.getFromLocation(lat, lng, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Address obj = addresses.get(0);
+            return new Pair<>(obj.getCountryName(), obj.getAdminArea());
+        }
+
     }
 
 }
