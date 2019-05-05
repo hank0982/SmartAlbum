@@ -2,6 +2,7 @@ package cse.cuhk.smartalbum.photodetails;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
+import cse.cuhk.smartalbum.FullPhotoActivity;
 import cse.cuhk.smartalbum.R;
 import cse.cuhk.smartalbum.photodetails.adapter.TravelViewPagerAdapter;
 import cse.cuhk.smartalbum.photodetails.model.Travel;
@@ -39,6 +41,7 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
     private ViewPager viewPager;
     private int[] colors = {1694446387, 1694472499, 1694498611, 1687813939, 1681129267, 1681129369, 1681129471, 1681103359, 1681077247, 1687761919, 1694446591, 1694446489};
     private ViewGroup back;
+    int photo_position;
     private ArrayList<Integer> photos;
     private DBHelper db;
     public static int manipulateColor(int color, float factor) {
@@ -62,6 +65,7 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
 //        photos = db.getAllPhotos();
         photos = getIntent().getIntegerArrayListExtra(PHOTOS_ARRAY);
         final int position = getIntent().getIntExtra(PHOTO_ID, -999);
+        photo_position = position;
         TravelViewPagerAdapter adapter = new TravelViewPagerAdapter(getSupportFragmentManager());
         adapter.addAll(photos);
         viewPager.setAdapter(adapter);
@@ -116,13 +120,23 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
                 options.toBundle());
     }
 
+
+    @SuppressWarnings("unchecked")
+    private void startFullPhotoActivity(View view) {
+        final Intent intent = new Intent(this, FullPhotoActivity.class);
+        intent.putExtra(FullPhotoActivity.PHOTOS_ARRAY, photos);
+        intent.putExtra(FullPhotoActivity.PHOTO_POSITION, viewPager.getCurrentItem());
+        Activity activity = this;
+//        ActivityOptionsCompat options = ActivityOptionsCompat.
+//                makeSceneTransitionAnimation(activity, new Pair<>(view, getString(R.string.transition_image)));
+        startActivity(intent);
+    }
     @Override
     public void onExpandingClick(View v) {
         //v is expandingfragment layout
         View view = v.findViewById(R.id.photo_details_sharedImage);
-        Cursor res = db.getData(photos.get(viewPager.getCurrentItem()), DBHelper.PHOTOS_TABLE_NAME);
-        res.moveToFirst();
-        Photo photo = DBHelper.convertCursorToPhoto(res);
-        startInfoActivity(view,photo);
+        startFullPhotoActivity(view);
+        finish();
+//        startInfoActivity(view,photo);
     }
 }
