@@ -92,13 +92,13 @@ public class AllPhotosFragment extends Fragment {
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
-                        final Intent intent = new Intent(getActivity(), PhotoDetailsActivity.class);
+                        final Intent intent = new Intent(getActivity(), FullPhotoActivity.class);
                         ArrayList<Integer> photoids = new ArrayList<>();
                         for (Photo photo: photos){
                             photoids.add(photo.id);
                         }
-                        intent.putExtra(PhotoDetailsActivity.PHOTOS_ARRAY, photoids);
-                        intent.putExtra(PhotoDetailsActivity.PHOTO_ID, position);
+                        intent.putExtra(FullPhotoActivity.PHOTOS_ARRAY, photoids);
+                        intent.putExtra(FullPhotoActivity.PHOTO_POSITION, position);
                         startActivity(intent);
                     }
 

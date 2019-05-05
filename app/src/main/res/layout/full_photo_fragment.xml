@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-<ImageView
-    android:id="@+id/fullphoto_image"
+<RelativeLayout android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:transitionName="@string/transition_image"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"> // Only works inside a RelativeLayout
+    <ImageView
+        android:id="@+id/fullphoto_image"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    />
+    <com.hootsuite.nachos.NachoTextView
+        android:id="@+id/fullphoto_image_nacho_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
 
-</LinearLayout>
+        android:layout_alignLeft="@+id/fullphoto_image"
+        android:layout_alignRight="@+id/fullphoto_image"
+        android:layout_alignBottom="@+id/fullphoto_image"
+        android:layout_margin="20dp"
+        android:gravity="center_horizontal"
+        android:background="@android:color/transparent"
+        app:queryBackground="@android:color/transparent"
+        app:chipTextSize="16dp"
+        app:chipHeight="30dp"
+        app:chipVerticalSpacing="3dp"
+        />
+
+</RelativeLayout>

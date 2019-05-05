@@ -57,15 +57,15 @@ public class FullPhotoActivity extends AppCompatActivity {
 //        intent.putExtra(EXTRA_PHOTO, photo);
 //        return intent;
 //    }
-    public void onBackPressed(){
-        final Intent intent = new Intent(this, PhotoDetailsActivity.class);
-        intent.putExtra(PhotoDetailsActivity.PHOTOS_ARRAY, photos);
-        intent.putExtra(PhotoDetailsActivity.PHOTO_ID, vpPager.getCurrentItem());
-        startActivity(intent);
-        vpPager = null;
-        photos = null;
-        this.finish();
-    }
+//    public void onBackPressed(){
+//        final Intent intent = new Intent(this, PhotoDetailsActivity.class);
+//        intent.putExtra(PhotoDetailsActivity.PHOTOS_ARRAY, photos);
+//        intent.putExtra(PhotoDetailsActivity.PHOTO_ID, vpPager.getCurrentItem());
+//        startActivity(intent);
+//        vpPager = null;
+//        photos = null;
+//        this.finish();
+//    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("Created", "Created");
