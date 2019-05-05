@@ -7,8 +7,6 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import cse.cuhk.smartalbum.utils.Album;
@@ -67,7 +65,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 27);
+        super(context, DATABASE_NAME , null, 28);
     }
 
     @Override
@@ -82,7 +80,7 @@ public class DBHelper extends SQLiteOpenHelper {
         );
         db.execSQL(
                 "create table ALBUMPHOTOS " +
-                        "(albumphotoid integer primary key, photoid integer,albumid integer)"
+                        "(albumphotoid integer primary key, photoid integer,albumid integer, UNIQUE(photoid, albumid))"
         );
         db.execSQL(
                 "create table TAGS " +
@@ -261,16 +259,37 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public boolean insertPhotoToAlbum(int photoID, int albumID) {
         SQLiteDatabase db = this.getWritableDatabase();
+        /*
         String query = "SELECT * FROM " + ALBUMPHOTOS_TABLE_NAME + " WHERE " + ALBUMPHOTOS_COLUMN_PHOTOID + "=" + photoID + " AND " + ALBUMPHOTOS_COLUMN_ALBUMID + "=" + albumID;
         Cursor res = db.rawQuery(query, null);
         if (res.getCount() > 0) {
             Log.d("insertPhotoToAlbum", "repeat insertion of photo " + photoID + " in album " + albumID);
             return false;
-        }
+        }*/
         ContentValues contentValues = new ContentValues();
         contentValues.put("photoid", photoID);
         contentValues.put("albumid", albumID);
-        db.insert(ALBUMPHOTOS_TABLE_NAME, null, contentValues);
+        // db.insertWithOnConflict(ALBUMPHOTOS_TABLE_NAME, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
+        //long result = db.insertOrThrow(ALBUMPHOTOS_TABLE_NAME, null, contentValues);
+        //return (result > 0 ? true:false);
+        try {
+            db.insertOrThrow(ALBUMPHOTOS_TABLE_NAME, null, contentValues);
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean updateAlbumCoverPhoto(int photoID, int albumID) {
+        Log.d("updateAlbumCoverPhoto", photoID + " - " + albumID);
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        String query = "SELECT * FROM " + PHOTOS_TABLE_NAME + " WHERE " + PHOTOS_COLUMN_PHOTOID + "=" + photoID;
+        Cursor res = db.rawQuery(query, null);
+        res.moveToFirst();
+        contentValues.put(ALBUMS_COLUMN_COVERPHOTO, convertCursorToPhoto(res).path);
+        db.update(ALBUMS_TABLE_NAME, contentValues, "albumid = ? ", new String[] { Long.toString(albumID) } );
         return true;
     }
 

@@ -334,13 +334,18 @@ public class AlbumFragment extends Fragment {
 
         }
 
-        public void showDialog(String albumName, final int albumID) {
+        public void showDialog(String albumName, final int albumID, boolean isAutoAlbum) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("Are you sure you want to delete the " + albumName + " album?").setTitle("Delete album?");
+            if (isAutoAlbum) {
+                builder.setMessage("Are you sure you want to delete the " + albumName + " album? We will not automatically create this album again.").setTitle("Delete album?");
+            } else {
+                builder.setMessage("Are you sure you want to delete the " + albumName + " album?").setTitle("Delete album?");
+            }
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     db.deleteAlbum(albumID);
+                    ((MainActivity) getActivity()).reloadFragment();
                 }
             });
             builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -383,11 +388,11 @@ public class AlbumFragment extends Fragment {
                         builder.create().show();
                     }
                     else {
-                        showDialog(album.name, album.id);
+                        showDialog(album.name, album.id, false);
                     }
                 }else{
                     final Album album = autoAlbums.get(activeCardPosition % autoAlbums.size());
-                    showDialog(album.name, album.id);
+                    showDialog(album.name, album.id, true);
                 }
             } else if (clickedPosition > activeCardPosition) {
                 if(row == 1){
@@ -396,18 +401,18 @@ public class AlbumFragment extends Fragment {
                     secondRecyclerView.smoothScrollToPosition(clickedPosition);
                 }
                 if(row == 1){
-                    final Album album = manulAlbums.get(activeCardPosition % manulAlbums.size());
+                    final Album album = manulAlbums.get(clickedPosition % manulAlbums.size());
                     if (album.name.equals(Album.ALL_PHOTOS_ALBUM_NAME)) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         builder.setMessage("All Photos album cannot be deleted");
                         builder.create().show();
                     }
                     else {
-                        showDialog(album.name, album.id);
+                        showDialog(album.name, album.id, false);
                     }
                 }else{
-                    final Album album = autoAlbums.get(activeCardPosition % autoAlbums.size());
-                    showDialog(album.name, album.id);
+                    final Album album = autoAlbums.get(clickedPosition % autoAlbums.size());
+                    showDialog(album.name, album.id, true);
                 }
             }
             return true;

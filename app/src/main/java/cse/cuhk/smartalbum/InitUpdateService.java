@@ -281,7 +281,10 @@ public class InitUpdateService extends Service {
                     ArrayList<Long> IdList = db.insertTag(tag, false);
                     db.insertTagToPhoto(IdList.get(0), photoId);
                     if (IdList.size() == 2) {
-                        db.insertPhotoToAlbum((int)photoId, IdList.get(1).intValue());
+                        boolean insertRes = db.insertPhotoToAlbum((int)photoId, IdList.get(1).intValue());
+                        if (insertRes) {
+                            db.updateAlbumCoverPhoto((int) photoId, IdList.get(1).intValue());
+                        }
                     }
                     count++;
                     if (count >= 3) {
