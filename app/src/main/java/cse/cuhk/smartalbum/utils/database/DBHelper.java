@@ -147,7 +147,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             if (newCount == ALBUM_CREATE_NUM) {
                 ArrayList<Integer> photoIDList = getPhotoIDsByTags(tags);
-                Cursor res = this.getData(photoIDList.get(0), PHOTOS_TABLE_NAME);
+                Cursor res = this.getData(photoIDList.get(photoIDList.size()-1), PHOTOS_TABLE_NAME);
                 res.moveToFirst();
                 Photo photo = this.convertCursorToPhoto(res);
                 long albumID = insertAlbum(tag.name, photo.path, Album.AUTO_ALBUM);
