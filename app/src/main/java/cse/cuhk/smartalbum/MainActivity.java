@@ -145,7 +145,9 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
-
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
                 } else {
                     Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
                 }
