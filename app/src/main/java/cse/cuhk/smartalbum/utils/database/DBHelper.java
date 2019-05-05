@@ -68,7 +68,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 33);
+        super(context, DATABASE_NAME , null, 34);
     }
 
     @Override

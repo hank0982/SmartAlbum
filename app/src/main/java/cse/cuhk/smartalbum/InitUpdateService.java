@@ -63,20 +63,16 @@ public class InitUpdateService extends Service {
             Log.d("START", "STARTRUN");
             //DB work here
             ArrayList<String> allImages = getAllShownImagesPath(InitUpdateService.this);
-            int counter = 0;
             for(String imagePath: allImages){
                 long photoId;
                 if (!imagePathSet.contains(imagePath)) {
                     imagePathSet.add(imagePath);
                     photoId = db.insertPhoto(imagePath, imagePath, "No description available.");
-                    counter ++;
-                    if(counter <= 10){
-                        try {
-                            Log.d("VisionAPI - file path", imagePath);
-                            new analyzeImage(photoId).executeOnExecutor(SERIAL_EXECUTOR,imagePath);
-                        } catch (Exception e) {
-                            Log.d("VisionAPI - Exception", e.toString());
-                        }
+                    try {
+                        Log.d("VisionAPI - file path", imagePath);
+                        new analyzeImage(photoId).executeOnExecutor(SERIAL_EXECUTOR,imagePath);
+                    } catch (Exception e) {
+                        Log.d("VisionAPI - Exception", e.toString());
                     }
                 }
             }

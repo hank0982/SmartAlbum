@@ -120,8 +120,6 @@ public class FragmentBottom extends Fragment {
 //                        }
 //                    }
 //                });
-//
-//
 //            }
 //        }.execute("LOAD_TAG_FROM_DB");
         TextView exifInfo = view.findViewById(R.id.photo_details_activity_exif);
