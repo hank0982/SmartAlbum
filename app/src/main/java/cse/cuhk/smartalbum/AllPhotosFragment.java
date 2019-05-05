@@ -48,7 +48,7 @@ public class AllPhotosFragment extends Fragment {
     private int albumID;
     public AllPhotosFragment(){
         db = DBHelper.getInstance(this.getContext());
-        this.albumID = albumID;
+        this.albumID = 0;
         this.title = "All Photos";
         this.photos = db.getAllPhotos();
     }
@@ -57,6 +57,12 @@ public class AllPhotosFragment extends Fragment {
         this.albumID = albumID;
         this.photos = db.getPhotosInAlbum(AlbumID);
         this.title = title;
+    }
+    public AllPhotosFragment(ArrayList<Photo> photos){
+        db = DBHelper.getInstance(this.getContext());
+        this.photos = photos;
+        this.title = null;
+        this.albumID = 0;
     }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,16 +74,14 @@ public class AllPhotosFragment extends Fragment {
         Log.d("onCreateVIew","CreateView");
         View view = inflater.inflate(R.layout.all_photos_fragment, container, false);
         TextView title = view.findViewById(R.id.all_photos_title);
-        title.setText(this.title);
-        title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
-        title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
-        for(Photo photo: photos){
-            Log.d("DES",photo.des);
-            Log.d("NAME",photo.name);
-            Log.d("ID", String.valueOf(photo.id));
-            Log.d("DES",photo.path);
-
+        if(title == null){
+            title.setVisibility(View.INVISIBLE);
+        }else{
+            title.setText(this.title);
+            title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
+            title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
         }
+
         PhotoViewAdaptor recyclerAdapter = new PhotoViewAdaptor(this.getActivity(), photos);
         final GreedoLayoutManager layoutManager = new GreedoLayoutManager(recyclerAdapter);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.photo_view);
@@ -93,7 +97,6 @@ public class AllPhotosFragment extends Fragment {
                         }
                         intent.putExtra(PhotoDetailsActivity.PHOTOS_ARRAY, photoids);
                         intent.putExtra(PhotoDetailsActivity.PHOTO_ID, position);
-                        Log.d("test", "test");
                         startActivity(intent);
                     }
 

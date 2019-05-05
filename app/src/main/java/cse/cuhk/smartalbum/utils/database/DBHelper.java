@@ -8,6 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import cse.cuhk.smartalbum.utils.Album;
 import cse.cuhk.smartalbum.utils.Photo;
@@ -144,15 +147,15 @@ public class DBHelper extends SQLiteOpenHelper {
             int newCount = tag.count + 1;
 
             if (newCount == ALBUM_CREATE_NUM) {
-                ArrayList<Integer> photoIDList = getPhotoIDsByTags(tags);
-                Cursor res = this.getData(photoIDList.get(photoIDList.size()-1), PHOTOS_TABLE_NAME);
+                ArrayList<Photo> photoList = getPhotosByTags(tags);
+                Cursor res = this.getData(photoList.get(photoList.size()-1).id, PHOTOS_TABLE_NAME);
                 res.moveToFirst();
                 Photo photo = this.convertCursorToPhoto(res);
                 long albumID = insertAlbum(tag.name, photo.path, Album.AUTO_ALBUM);
                 updateTagAutoAlbumID(tag.id, (int)albumID);
                 idList.add(albumID);
-                for (int photoid: photoIDList) {
-                    insertPhotoToAlbum(photoid, (int)albumID);
+                for (Photo photoInList: photoList) {
+                    insertPhotoToAlbum(photoInList.id, (int)albumID);
                 }
             } else if (newCount > ALBUM_CREATE_NUM && tag.autoAlbumID != -1) {
                 idList.add(Long.valueOf(tag.autoAlbumID));
@@ -365,9 +368,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
-    public ArrayList<Integer> getPhotoIDsByTags(ArrayList<Tag> tags) {
+    public ArrayList<Photo> getPhotosByTags(ArrayList<Tag> tags) {
 
-        if (tags.size() == 0) {
+        if (tags==null || tags.size() == 0) {
             return null;
         }
 
@@ -378,22 +381,25 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         tagList.append("" + tags.get(tagLen-1).id + "");
 
-        ArrayList<Integer> photoIDs = new ArrayList<>();
+        HashSet<Photo> photoIDs = new HashSet<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "select * from PHOTOTAGS where tagid in (" + tagList.toString() +")";
+        String sql = "select * from PHOTOTAGS NATURAL JOIN PHOTOS where tagid in (" + tagList.toString() +")";
         Log.d("SQL", sql);
         Cursor res = db.rawQuery(sql, null);
         if (res.getCount() > 0) {
             res.moveToFirst();
             while (res.isAfterLast() == false) {
                 int id = res.getInt(res.getColumnIndex(PHOTOS_COLUMN_PHOTOID));
-
-                photoIDs.add(id);
+                String photo_path = res.getString(res.getColumnIndex(PHOTOS_COLUMN_PATH));
+                String photo_name = res.getString(res.getColumnIndex(PHOTOS_COLUMN_NAME));
+                String photo_des = res.getString(res.getColumnIndex(PHOTOS_COLUMN_DES));
+                photoIDs.add(new Photo(id,photo_name, photo_path, photo_des));
                 res.moveToNext();
             }
             res.close();
-            return photoIDs;
+            ArrayList<Photo> photosArrayList = new ArrayList<>(photoIDs);
+            return photosArrayList;
         }
         else {
             res.close();

@@ -106,7 +106,7 @@ public class PhotoViewAdaptor extends RecyclerView.Adapter<PhotoViewAdaptor.Phot
 
     @Override
     public int getItemCount() {
-        return photos.size();
+        return photos==null? 0:photos.size();
     }
     private int getLoopedIndex(int index) {
         return index % photos.size(); // wrap around
