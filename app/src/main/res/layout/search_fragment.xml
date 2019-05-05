@@ -7,9 +7,9 @@
     <RelativeLayout
         android:id="@+id/search_title_layout"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="80dp"
         android:layout_marginTop="20dp"
-        android:layout_marginBottom="10dp">
+        >
 
         <FrameLayout
             android:id="@+id/search_title_bar"
@@ -27,18 +27,30 @@
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
-
         </FrameLayout>
 
     </RelativeLayout>
-    <com.arlib.floatingsearchview.FloatingSearchView
-        android:id="@+id/floating_search_view"
+    <RelativeLayout
+        android:id="@+id/search_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp"
+        >
+
+        <com.arlib.floatingsearchview.FloatingSearchView
+            android:id="@+id/floating_search_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:floatingSearch_searchHint="Search..."
+            app:floatingSearch_suggestionsListAnimDuration="250"
+            app:floatingSearch_showSearchKey="true"
+            app:floatingSearch_leftActionMode="showHamburger"
+            app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
+    </RelativeLayout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/search_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
-        app:floatingSearch_searchHint="Search..."
-        app:floatingSearch_suggestionsListAnimDuration="250"
-        app:floatingSearch_showSearchKey="true"
-        app:floatingSearch_leftActionMode="showHamburger"
-        app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
+        android:layout_above="@id/floating_search_view" />
 </LinearLayout>

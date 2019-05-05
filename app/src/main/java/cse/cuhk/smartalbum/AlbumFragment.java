@@ -146,17 +146,17 @@ public class AlbumFragment extends Fragment {
                                 }
                             }
 
-                            ArrayList<Integer> photoIDList = db.getPhotoIDsByTags(tags);
-                            if (photoIDList == null) {
+                            ArrayList<Photo> photoList = db.getPhotosByTags(tags);
+                            if (photoList == null) {
                                 return;
                             }
-                            Cursor res = db.getData(photoIDList.get(photoIDList.size()-1), db.PHOTOS_TABLE_NAME);
+                            Cursor res = db.getData(photoList.get(photoList.size()-1).id, db.PHOTOS_TABLE_NAME);
                             res.moveToFirst();
                             Photo photo = db.convertCursorToPhoto(res);
                             long albumID = db.insertAlbum(albumName, photo.path, Album.MANUAL_ALBUM);
                             Log.d("album name and id", albumName + " " + albumID);
-                            for (int photoid: photoIDList) {
-                                db.insertPhotoToAlbum(photoid, (int)albumID);
+                            for (Photo photoInList: photoList) {
+                                db.insertPhotoToAlbum(photoInList.id, (int)albumID);
                             }
                         }
                         ((MainActivity) getActivity()).reloadFragment();

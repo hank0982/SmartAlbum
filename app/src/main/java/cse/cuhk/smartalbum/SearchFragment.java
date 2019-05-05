@@ -12,11 +12,14 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import cse.cuhk.smartalbum.utils.Photo;
@@ -31,7 +34,7 @@ public class SearchFragment extends Fragment {
     }
 
     private String mLastQuery = "";
-
+    private ArrayList<Photo> photos;
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -59,35 +62,73 @@ public class SearchFragment extends Fragment {
                 }
                 Log.d("newQuery", newQuery);
                 //get suggestions based on newQuery
-                ArrayList<Tag> tags = db.searchTagsByName(newQuery, false);
-                List<TagSuggestion> suggestionList = new ArrayList<>();
-                if(tags != null){
-                    for (Tag tag : tags) {
-                        suggestionList.add(new TagSuggestion(tag.name));
+                String[] tags = newQuery.split("\\s");
+                String writingTag = tags[tags.length-1];
+                HashSet<Tag> tagSet = new HashSet<>();
+
+                for(String tag: tags){
+                    ArrayList<Tag> searchTags = db.searchTagsByName(tag, true);
+                    if(searchTags != null){
+                        for(Tag searchedTag:searchTags){
+                            tagSet.add(searchedTag);
+                        }
                     }
                 }
-                ArrayList<Integer> photos = db.getPhotoIDsByTags(tags);
-                Log.d("photoids", String.valueOf(photos));
+
+                ArrayList<Tag> suggestedTags = db.searchTagsByName(writingTag, false);
+                if(suggestedTags != null){
+                    HashSet<Tag> tagSuggestion = new HashSet<>(suggestedTags);
+                    List<TagSuggestion> suggestionList = new ArrayList<>();
+                    if(tagSuggestion != null){
+                        for (Tag tag : tagSuggestion) {
+                            suggestionList.add(new TagSuggestion(tag.name));
+                        }
+                    }
+                    photos = db.getPhotosByTags(new ArrayList<>(tagSet));
+                    mSearchView.swapSuggestions(suggestionList);
+                }
+
                 //pass them on to the search view
-                mSearchView.swapSuggestions(suggestionList);
             }
         });
         mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
             @Override
             public void onSuggestionClicked(final SearchSuggestion searchSuggestion) {
-
-                mLastQuery = searchSuggestion.getBody();
-                mSearchView.clearQuery();;
+//                Log.d("photos", String.valueOf(photos));
+//                if(photos != null && photos.size() != 0){
+//                    FragmentTransaction trans = getChildFragmentManager().beginTransaction();
+//                    trans.replace(R.id.search_fragment_container, new AllPhotosFragment(photos));
+//                    trans.commit();
+//                }
+                String [] tags = mSearchView.getQuery().split("\\s");
+                String writingTag = tags[tags.length-1];
+                String finalTag = "";
+                for(String item: tags){
+                    if(!item.equals(writingTag)){
+                        finalTag = finalTag + item + " ";
+                    }else{
+                        finalTag = finalTag + searchSuggestion.getBody();
+                    }
+                }
+                mSearchView.setSearchText(finalTag);
+//                mSearchView.clearQuery();;
                 mSearchView.clearSuggestions();
-                mSearchView.clearSearchFocus();
+//                mSearchView.clearSearchFocus();
             }
 
             @Override
             public void onSearchAction(String query) {
+                if(photos != null && photos.size() != 0){
+                    Log.d("photos", String.valueOf(photos));
+                    FragmentTransaction trans = getChildFragmentManager().beginTransaction();
+                    trans.replace(R.id.search_fragment_container, new AllPhotosFragment(photos));
+                    trans.commit();
+                }
                 mLastQuery = query;
                 mSearchView.clearQuery();;
                 mSearchView.clearSuggestions();
                 mSearchView.clearSearchFocus();
+
             }
         });
         return view;
