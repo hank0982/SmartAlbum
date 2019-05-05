@@ -82,7 +82,8 @@ public class SearchFragment extends Fragment {
                             suggestionList.add(new TagSuggestion(tag.name));
                         }
                     }
-                    photos = db.getPhotosByTags(new ArrayList<>(tagSet));
+                    photos = new ArrayList<>(new HashSet<>(db.getPhotosByTags(new ArrayList<>(tagSet))));
+
                     mSearchView.swapSuggestions(suggestionList);
                 }
 
