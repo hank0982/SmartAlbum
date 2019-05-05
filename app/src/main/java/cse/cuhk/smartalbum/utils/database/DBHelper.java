@@ -68,7 +68,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 28);
+        super(context, DATABASE_NAME , null, 33);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class DBHelper extends SQLiteOpenHelper {
         );
         db.execSQL(
                 "create table PHOTOTAGS " +
-                        "(phototagid integer primary key, photoid integer,tagid integer)"
+                        "(phototagid integer primary key, photoid integer, tagid integer, UNIQUE(photoid, tagid))"
         );
     }
 
@@ -256,8 +256,13 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("tagid", tagID);
         contentValues.put("photoid", photoID);
-        db.insert(PHOTOTAGS_TABLE_NAME, null, contentValues);
-        return true;
+        try {
+            db.insertOrThrow(PHOTOTAGS_TABLE_NAME, null, contentValues);
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean insertPhotoToAlbum(int photoID, int albumID) {

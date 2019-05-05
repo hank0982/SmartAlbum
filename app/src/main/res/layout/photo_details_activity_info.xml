@@ -35,13 +35,15 @@
                 android:layout_width="match_parent">
 
                 <TextView
-                    android:id="@+id/photo_details_activity_title"
-                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/photo_details_activity_exif"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:layout_marginLeft="30dp"
                     android:layout_marginTop="30dp"
-                    android:layout_width="wrap_content"
-                    tools:text="La Crescenta-Montrose,CA91020"/>
+                    android:layout_marginRight="30dp"
+                    android:lineSpacingExtra="6sp"
+                    android:textSize="16sp" />
 
             </RelativeLayout>
 
