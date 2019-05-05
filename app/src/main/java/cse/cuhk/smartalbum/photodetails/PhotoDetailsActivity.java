@@ -2,6 +2,7 @@ package cse.cuhk.smartalbum.photodetails;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import android.transition.Explode;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +56,9 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
                 Math.min(g,255),
                 Math.min(b,255));
     }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +75,6 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
         adapter.addAll(photos);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(position);
-
         ExpandingPagerFactory.setupViewPager(viewPager);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -87,6 +91,11 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
 
             @Override
             public void onPageSelected(int position) {
+//                ExpandingFragment expandingFragment = ExpandingPagerFactory.getCurrentFragment(viewPager);
+//
+//                if(expandingFragment != null && expandingFragment.isClosed()){
+//                    expandingFragment.open();
+//                }
             }
 
             @Override
@@ -94,12 +103,17 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
 
             }
         });
+
+
     }
 
     @Override
     public void onBackPressed() {
         if(!ExpandingPagerFactory.onBackPressed(viewPager)){
-            super.onBackPressed();
+//            super.onBackPressed();
+            View view = this.findViewById(R.id.photo_details_sharedImage);
+            startFullPhotoActivity(view);
+            finish();
         }
     }
 

@@ -75,6 +75,7 @@ public class FullPhotoFragment extends Fragment {
         ActivityCompat.startActivity(activity,
                 intent,
                 options.toBundle());
+        activity.finish();
     }
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
