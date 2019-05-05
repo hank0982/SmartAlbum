@@ -10,6 +10,9 @@ import android.util.Log;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import cse.cuhk.smartalbum.utils.Album;
 import cse.cuhk.smartalbum.utils.Photo;
@@ -343,7 +346,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public ArrayList<Integer> getPhotoIDsByTags(ArrayList<Tag> tags) {
 
-        if (tags.size() == 0) {
+        if (tags==null || tags.size() == 0) {
             return null;
         }
 
@@ -354,7 +357,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         tagList.append("" + tags.get(tagLen-1).id + "");
 
-        ArrayList<Integer> photoIDs = new ArrayList<>();
+        HashSet<Integer> photoIDs = new HashSet<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "select * from PHOTOTAGS where tagid in (" + tagList.toString() +")";
@@ -369,7 +372,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 res.moveToNext();
             }
             res.close();
-            return photoIDs;
+            ArrayList<Integer> photoIDsArrayList = new ArrayList<>(photoIDs);
+            return photoIDsArrayList;
         }
         else {
             res.close();

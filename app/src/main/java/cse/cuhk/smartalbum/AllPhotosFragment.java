@@ -58,6 +58,11 @@ public class AllPhotosFragment extends Fragment {
         this.photos = db.getPhotosInAlbum(AlbumID);
         this.title = title;
     }
+    public AllPhotosFragment(ArrayList<Photo> photos){
+        db = DBHelper.getInstance(this.getContext());
+        this.photos = photos;
+        this.title = null;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
