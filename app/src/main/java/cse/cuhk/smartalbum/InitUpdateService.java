@@ -108,7 +108,7 @@ public class InitUpdateService extends Service {
         for(Photo photo: photos){
             imagePathSet.add(photo.path);
         }
-        Toast.makeText(this, "Service Created", Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "Service Created", Toast.LENGTH_LONG).show();
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
         // main thread, which we don't want to block.  We also make it
@@ -125,7 +125,7 @@ public class InitUpdateService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
         mServiceHandler.removeCallbacks(yourRunnable);
         mServiceLooper.quit();
     }

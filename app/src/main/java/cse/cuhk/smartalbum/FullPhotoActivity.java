@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import java.lang.reflect.Array;
@@ -45,7 +46,7 @@ public class FullPhotoActivity extends AppCompatActivity {
         // Returns the fragment to display for that page
         @Override
         public Fragment getItem(int position) {
-            return new FullPhotoFragment(photos.get(position));
+            return new FullPhotoFragment(photos.get(position), photos, position);
         }
 
 
@@ -66,6 +67,7 @@ public class FullPhotoActivity extends AppCompatActivity {
 //        photos = null;
 //        this.finish();
 //    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("Created", "Created");

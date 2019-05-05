@@ -131,12 +131,12 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
 //                makeSceneTransitionAnimation(activity, new Pair<>(view, getString(R.string.transition_image)));
         startActivity(intent);
     }
-    @Override
+//    @Override
     public void onExpandingClick(View v) {
-        //v is expandingfragment layout
-        View view = v.findViewById(R.id.photo_details_sharedImage);
-        startFullPhotoActivity(view);
-        finish();
-//        startInfoActivity(view,photo);
+//        //v is expandingfragment layout
+//        View view = v.findViewById(R.id.photo_details_sharedImage);
+//        startFullPhotoActivity(view);
+//        finish();
+////        startInfoActivity(view,photo);
     }
 }

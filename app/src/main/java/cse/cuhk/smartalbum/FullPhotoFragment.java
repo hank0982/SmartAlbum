@@ -51,9 +51,14 @@ import static androidx.core.content.ContextCompat.getSystemService;
 
 public class FullPhotoFragment extends Fragment {
     int photoID;
+    int position;
     DBHelper db;
-    public FullPhotoFragment(int photoID){
+    ArrayList<Integer> photosIDs;
+
+    public FullPhotoFragment(int photoID, ArrayList<Integer> photosIDs, int position){
         this.photoID = photoID;
+        this.photosIDs = photosIDs;
+        this.position = position;
     }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,11 +66,14 @@ public class FullPhotoFragment extends Fragment {
         db = DBHelper.getInstance(this.getContext());
     }
     private void startInfoActivity(View view, Photo photo) {
+        final Intent intent = new Intent(getActivity(), cse.cuhk.smartalbum.photodetails.PhotoDetailsActivity.class);
+        intent.putExtra(cse.cuhk.smartalbum.photodetails.PhotoDetailsActivity.PHOTOS_ARRAY, photosIDs);
+        intent.putExtra(cse.cuhk.smartalbum.photodetails.PhotoDetailsActivity.PHOTO_ID, position);
         Activity activity = this.getActivity();
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(activity, new Pair<>(view, getString(R.string.transition_image)));
         ActivityCompat.startActivity(activity,
-                InfoActivity.newInstance(activity, photo),
+                intent,
                 options.toBundle());
     }
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -125,8 +133,6 @@ public class FullPhotoFragment extends Fragment {
                         }
                     }
                 });
-
-
             }
         }.execute("LOAD_TAG_FROM_DB");
         return view;
@@ -157,7 +163,6 @@ public class FullPhotoFragment extends Fragment {
                         boolean result = db.insertPhotoToAlbum(photoID, rowIDs.get(1).intValue());
                         if (result) {
                             db.updateAlbumCoverPhoto(photoID, rowIDs.get(1).intValue());
-                            ((MainActivity) getActivity()).reloadFragment();
                         }
                     }
                 }

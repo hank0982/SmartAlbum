@@ -10,16 +10,21 @@
     android:layout_marginBottom="10dp"
     android:orientation="vertical"
     tools:context=".photodetails.fragments.FragmentBottom">
-
-    <com.hootsuite.nachos.NachoTextView
-        android:id="@+id/photo_details_bottom_nacho_text_view"
-        android:layout_width="match_parent"
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scrollbars="none"
+        android:layout_weight="1">
+    <TextView
+        android:id="@+id/photo_details_activity_exif"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:chipTextSize="16dp"
-        app:chipHeight="30dp"
-        app:chipVerticalSpacing="3dp"/>
+        android:layout_gravity="center_horizontal"
 
+        android:lineSpacingExtra="2sp"
+        android:textSize="16sp" />
 
+    </ScrollView>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
