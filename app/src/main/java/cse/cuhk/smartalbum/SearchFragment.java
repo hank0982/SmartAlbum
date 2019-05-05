@@ -3,7 +3,6 @@ package cse.cuhk.smartalbum;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +16,6 @@ import androidx.fragment.app.FragmentTransaction;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -40,9 +38,9 @@ public class SearchFragment extends Fragment {
 
         final DBHelper db = DBHelper.getInstance(this.getActivity().getApplicationContext());
         View view = inflater.inflate(R.layout.search_fragment, container, false);
-        TextView title = view.findViewById(R.id.search_title);
-        title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
-        title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
+        //TextView title = view.findViewById(R.id.search_title);
+        //title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
+        //title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
         final FloatingSearchView mSearchView = view.findViewById(R.id.floating_search_view);
         mSearchView.setBackgroundColor(Color.parseColor("#787878"));
         mSearchView.setViewTextColor(Color.parseColor("#e9e9e9"));

@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,8 +76,8 @@ public class AllPhotosFragment extends Fragment {
         Log.d("onCreateVIew","CreateView");
         View view = inflater.inflate(R.layout.all_photos_fragment, container, false);
         TextView title = view.findViewById(R.id.all_photos_title);
-        if(title == null){
-            title.setVisibility(View.INVISIBLE);
+        if(this.title == null){
+            view.findViewById(R.id.all_photos_title).setVisibility(View.GONE);
         }else{
             title.setText(this.title);
             title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
