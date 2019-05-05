@@ -3,6 +3,7 @@ package cse.cuhk.smartalbum;
 import android.animation.ObjectAnimator;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.transition.Transition;
@@ -20,6 +21,10 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.microsoft.projectoxford.vision.rest.VisionServiceException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class AlbumDetailsActivity extends AppCompatActivity {
@@ -45,13 +50,16 @@ public class AlbumDetailsActivity extends AppCompatActivity {
         album = DBHelper.convertCursorToAlbum(res);
 
         Log.d("album name and ID", album.name + " " + albumID);
-        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
         if(album.name.equals(Album.ALL_PHOTOS_ALBUM_NAME)){
-            trans.add(R.id.photo_view_fragment_container, new AllPhotosFragment());
+            FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+            trans.replace(R.id.photo_view_fragment_container, new AllPhotosFragment());
+            trans.commit();
         }else{
-            ArrayList<Photo> photos =db.getPhotosInAlbum(albumID);
-            trans.add(R.id.photo_view_fragment_container, new AllPhotosFragment(photos, album.name));
+            FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+            trans.replace(R.id.photo_view_fragment_container, new AllPhotosFragment(albumID, album.name));
+            trans.commit();
         }
-        trans.commit();
     }
+
+
 }

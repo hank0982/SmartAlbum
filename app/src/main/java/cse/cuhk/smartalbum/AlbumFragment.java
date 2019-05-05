@@ -159,6 +159,7 @@ public class AlbumFragment extends Fragment {
                                 db.insertPhotoToAlbum(photoid, (int)albumID);
                             }
                         }
+                        ((MainActivity) getActivity()).reloadFragment();
                     }
                 });
 
@@ -315,9 +316,9 @@ public class AlbumFragment extends Fragment {
                 }
                 final Intent intent = new Intent(getActivity(), AlbumDetailsActivity.class);
                 if(row == 1){
-                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(activeCardPosition % manulAlbums.size()).id);
+                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, manulAlbums.get(clickedPosition % manulAlbums.size()).id);
                 }else{
-                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(activeCardPosition % autoAlbums.size()).id);
+                    intent.putExtra(AlbumDetailsActivity.BUNDLE_IMAGE_ID, autoAlbums.get(clickedPosition % autoAlbums.size()).id);
                 }
                 startActivity(intent);
             }

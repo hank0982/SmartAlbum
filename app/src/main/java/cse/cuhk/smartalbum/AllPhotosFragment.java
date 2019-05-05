@@ -45,34 +45,41 @@ public class AllPhotosFragment extends Fragment {
     private DBHelper db;
     private ArrayList<Photo> photos;
     private String title;
+    private int albumID;
     public AllPhotosFragment(){
+        db = DBHelper.getInstance(this.getContext());
+        this.albumID = albumID;
         this.title = "All Photos";
+        this.photos = db.getAllPhotos();
     }
-    public AllPhotosFragment(ArrayList<Photo> photos, String title){
-        this.photos = photos;
+    public AllPhotosFragment(int AlbumID, String title){
+        db = DBHelper.getInstance(this.getContext());
+        this.albumID = albumID;
+        this.photos = db.getPhotosInAlbum(AlbumID);
         this.title = title;
     }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = DBHelper.getInstance(this.getContext());
-        if(photos == null || photos.isEmpty()){
-            photos = db.getAllPhotos();
-        }
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        Log.d("onCreateVIew","CreateView");
         View view = inflater.inflate(R.layout.all_photos_fragment, container, false);
         TextView title = view.findViewById(R.id.all_photos_title);
         title.setText(this.title);
         title.setX(getResources().getDimensionPixelSize(R.dimen.left_offset));
         title.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "open-sans-extrabold.ttf"));
+        for(Photo photo: photos){
+            Log.d("DES",photo.des);
+            Log.d("NAME",photo.name);
+            Log.d("ID", String.valueOf(photo.id));
+            Log.d("DES",photo.path);
+
+        }
         PhotoViewAdaptor recyclerAdapter = new PhotoViewAdaptor(this.getActivity(), photos);
-
         final GreedoLayoutManager layoutManager = new GreedoLayoutManager(recyclerAdapter);
-
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.photo_view);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(recyclerAdapter);
@@ -114,7 +121,8 @@ public class AllPhotosFragment extends Fragment {
                                     selectedAlbums.remove(Integer.valueOf(which));
                                 }
                             }
-                        }).setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        }).
+                        setPositiveButton("Save", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 for (Integer index: selectedAlbums) {
