@@ -42,6 +42,9 @@ public abstract class ExpandingFragment extends Fragment {
         return inflater.inflate(R.layout.expanding_fragment, container, false);
     }
 
+    public Fragment getBottom(){
+        return fragmentBottom;
+    }
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -59,7 +62,9 @@ public abstract class ExpandingFragment extends Fragment {
         back = (CardView) view.findViewById(R.id.back);
         front = (CardView) view.findViewById(R.id.front);
         layout3 = (CardView) view.findViewById(R.id.bottomLayout);
-        view.setOnClickListener(new OnClick());
+        front.setOnClickListener(new OnClick());
+
+
         setupDownGesture(view);
 
         defaultCardElevation = front.getCardElevation();

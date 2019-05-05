@@ -91,11 +91,7 @@ public class PhotoDetailsActivity extends AppCompatActivity implements Expanding
 
             @Override
             public void onPageSelected(int position) {
-//                ExpandingFragment expandingFragment = ExpandingPagerFactory.getCurrentFragment(viewPager);
-//
-//                if(expandingFragment != null && expandingFragment.isClosed()){
-//                    expandingFragment.open();
-//                }
+
             }
 
             @Override

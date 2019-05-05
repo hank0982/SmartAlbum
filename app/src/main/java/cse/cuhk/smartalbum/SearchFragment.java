@@ -82,7 +82,12 @@ public class SearchFragment extends Fragment {
                             suggestionList.add(new TagSuggestion(tag.name));
                         }
                     }
-                    photos = new ArrayList<>(new HashSet<>(db.getPhotosByTags(new ArrayList<>(tagSet))));
+                    ArrayList<Photo> repeatedPhotos = db.getPhotosByTags(new ArrayList<>(tagSet));
+                    if(repeatedPhotos != null){
+                        photos = new ArrayList<>(new HashSet<>(repeatedPhotos));
+                    }else{
+                        photos = null;
+                    }
 
                     mSearchView.swapSuggestions(suggestionList);
                 }
@@ -124,7 +129,7 @@ public class SearchFragment extends Fragment {
                     trans.commit();
                 }
                 mLastQuery = query;
-                mSearchView.clearQuery();;
+//                mSearchView.clearQuery();;
                 mSearchView.clearSuggestions();
                 mSearchView.clearSearchFocus();
 
