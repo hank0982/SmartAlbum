@@ -45,13 +45,16 @@ public class AllPhotosFragment extends Fragment {
     private DBHelper db;
     private ArrayList<Photo> photos;
     private String title;
+    private int albumID;
     public AllPhotosFragment(){
         db = DBHelper.getInstance(this.getContext());
+        this.albumID = albumID;
         this.title = "All Photos";
         this.photos = db.getAllPhotos();
     }
     public AllPhotosFragment(int AlbumID, String title){
         db = DBHelper.getInstance(this.getContext());
+        this.albumID = albumID;
         this.photos = db.getPhotosInAlbum(AlbumID);
         this.title = title;
     }
@@ -80,69 +83,70 @@ public class AllPhotosFragment extends Fragment {
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.photo_view);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(recyclerAdapter);
-//        recyclerView.addOnItemTouchListener(
-//                new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
-//                    @Override public void onItemClick(View view, int position) {
-//                        final Intent intent = new Intent(getActivity(), PhotoDetailsActivity.class);
-//                        ArrayList<Integer> photoids = new ArrayList<>();
-//                        for (Photo photo: photos){
-//                            photoids.add(photo.id);
-//                        }
-//                        intent.putExtra(PhotoDetailsActivity.PHOTOS_ARRAY, photoids);
-//                        intent.putExtra(PhotoDetailsActivity.PHOTO_ID, position);
-//                        Log.d("test", "test");
-//                        startActivity(intent);
-//                    }
-//
-//                    @Override public void onLongItemClick(View view, int position) {
-//                        final int photoID = photos.get(position).id;
-//                        ArrayList<Album> albums = db.getAllAlbums();
-//                        final Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-//                        final CharSequence[] albumCharSeq = new CharSequence[albums.size()];
-//                        int i = 0;
-//                        for (Album album: albums) {
-//                            albumCharSeq[i] = album.name;
-//                            map.put(i, album.id);
-//                            i++;
-//                        }
-//                        final ArrayList<Integer> selectedAlbums = new ArrayList<>();
-//                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//                        builder.setTitle("Add this photo to album(s)");
-//                        builder.setMultiChoiceItems(albumCharSeq, null, new DialogInterface.OnMultiChoiceClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-//                                if (isChecked) {
-//                                    selectedAlbums.add(which);
-//                                }
-//                                else if (selectedAlbums.contains(which)) {
-//                                    selectedAlbums.remove(Integer.valueOf(which));
-//                                }
-//                            }
-//                        }).setPositiveButton("Save", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                for (Integer index: selectedAlbums) {
-//                                    if (map == null) {
-//                                        Log.d("Map", "null");
-//                                        return;
-//                                    }
-//                                    Integer albumID = map.get(index);
-//                                    if (albumID == null) {
-//                                        Log.d("AlbumID", "null");
-//                                        return;
-//                                    }
-//                                    db.insertPhotoToAlbum(photoID, albumID.intValue());
-//                                }
-//                            }
-//                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                            }
-//                        });
-//                        builder.create().show();
-//                    }
-//                })
-//        );
+        recyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(container.getContext(), recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        final Intent intent = new Intent(getActivity(), PhotoDetailsActivity.class);
+                        ArrayList<Integer> photoids = new ArrayList<>();
+                        for (Photo photo: photos){
+                            photoids.add(photo.id);
+                        }
+                        intent.putExtra(PhotoDetailsActivity.PHOTOS_ARRAY, photoids);
+                        intent.putExtra(PhotoDetailsActivity.PHOTO_ID, position);
+                        Log.d("test", "test");
+                        startActivity(intent);
+                    }
+
+                    @Override public void onLongItemClick(View view, int position) {
+                        final int photoID = photos.get(position).id;
+                        ArrayList<Album> albums = db.getAllAlbums();
+                        final Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+                        final CharSequence[] albumCharSeq = new CharSequence[albums.size()];
+                        int i = 0;
+                        for (Album album: albums) {
+                            albumCharSeq[i] = album.name;
+                            map.put(i, album.id);
+                            i++;
+                        }
+                        final ArrayList<Integer> selectedAlbums = new ArrayList<>();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setTitle("Add this photo to album(s)");
+                        builder.setMultiChoiceItems(albumCharSeq, null, new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                if (isChecked) {
+                                    selectedAlbums.add(which);
+                                }
+                                else if (selectedAlbums.contains(which)) {
+                                    selectedAlbums.remove(Integer.valueOf(which));
+                                }
+                            }
+                        }).
+                        setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                for (Integer index: selectedAlbums) {
+                                    if (map == null) {
+                                        Log.d("Map", "null");
+                                        return;
+                                    }
+                                    Integer albumID = map.get(index);
+                                    if (albumID == null) {
+                                        Log.d("AlbumID", "null");
+                                        return;
+                                    }
+                                    db.insertPhotoToAlbum(photoID, albumID.intValue());
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                        builder.create().show();
+                    }
+                })
+        );
         layoutManager.setFixedHeight(true);
 
 // Set the max row height in pixels

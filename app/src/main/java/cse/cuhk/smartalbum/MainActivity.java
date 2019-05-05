@@ -99,7 +99,11 @@ public class MainActivity extends AppCompatActivity {
         }
         trans.commit();
     }
-
+    public void reloadFragment(){
+        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+        trans.replace(R.id.fragment_container, new AlbumFragment());
+        trans.commit();
+    }
     private void showExplanation(String title,
                                  String message,
                                  final int permissionRequestCode) {

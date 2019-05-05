@@ -53,6 +53,7 @@ dependencies {
 // Temporary fix end
     implementation project(path: ':library')
     implementation "com.hootsuite.android:nachos:1.1.1"
+    implementation 'com.github.arimorty:floatingsearchview:2.1.1'
 
 
 }

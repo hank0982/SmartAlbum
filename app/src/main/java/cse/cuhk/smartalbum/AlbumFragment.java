@@ -158,6 +158,7 @@ public class AlbumFragment extends Fragment {
                                 db.insertPhotoToAlbum(photoid, (int)albumID);
                             }
                         }
+                        ((MainActivity) getActivity()).reloadFragment();
                     }
                 });
 
